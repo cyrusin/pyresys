@@ -4,11 +4,11 @@ pyresys
 Creat a recommender system.
 
 #Targets
-	##crawl
-	##search
-	##addindex
-	##recommender
+	crawl
+	search
+	addindex
+	recommender
 #Details
-	##item-based
-	##pagerank
-	##...
+	item-based
+	pagerank
+	...
