@@ -1,4 +1,5 @@
 import urllib2
+import re
 import sqlite3 as sqlite
 from bs4 import BeautifulSoup
 from urlparse import urljoin
@@ -12,10 +13,16 @@ class crawler:
 	def dbcommit(self):
 		self.con.commit()
 	def getentryid(self,table,field,value,addnew=True):
-		return None
+		cursor=self.con.execute("select rowid from %s where %s='%s'" % (table,field,value))
+		record=cursor.fetchone()
+		if record==None:
+			cursor=self.con.execute("insert into %s (%s) values ('%s')" % (table,field,value))
+			return cursor.lastrowid
+		else:
+			return record[0]
 	def createindex(self,url,soup):
-		if url.isindexed(): return 
-		print 'Indexing %s' % url
+		if self.isindexed(url): return 
+		print 'Indexing '+url
 		
 		textfromurl=self.gettext(soup)
 		words=self.sprwords(textfromurl)
@@ -27,31 +34,33 @@ class crawler:
 			self.con.execute("insert into wordlocationinurl(urlid,wordid,location) values (%d,%d,%d)" % (urlid,wordid,i))
 		
 	def gettext(self,soup):
-		contentstring=soup.strings
-		if contentstring==None:
+		cstring=soup.string
+		print type(cstring)
+		if cstring==None:
 			spcontents=soup.contents
 			result=''
 			for content in  spcontents:
 				result=result+self.gettext(content)+'\n'
 			return result
 		else:
-			return contentstring.strip()
+			return cstring.strip()
 
-			
-		return None
-	//分词
 	def sprwords(self,text):
 		splitter=re.compile('\\W*')
 		return [s.lower() for s in splitter.split(text) if s!='']
 
 	def isindexed(self,url):
+		u=self.con.execute("select rowid from urltable where url='%s'" % url).fetchone()
+		if u!=None:
+			v=self.con.execute('select * from worldlocationinurl where urlid=%d' % u[0]).fetchone()
+			if v!=None: return True
 		return False
 	def addfromtolink(self,urlFrom,urlTo,linkText):
 		pass
 	def crawl(self,pages,depth=2):
 		for i in range(depth):
-			print 'Crawling %d:' % i 
-			newpages=set()
+				print 'Crawling %d:' % i 
+				newpages=set()
 			for page in pages:
 				try:
 					c=urllib2.urlopen(page)
