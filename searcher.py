@@ -118,7 +118,9 @@ class querying:
 				wordid=wordrow[0]
 				wordidlist.append(wordid)
 				if wordcount>0:
-				
+					tables+=','
+					clauses+=' and '
+					clauses+='word%d.urlid=word%d.urlid and ' % (wordcount-1,wordcount)	
 				fields+=',word%d.location' % wordcount
 				tables+='wordlocationinurl word%d' % wordcount
 				clauses+='word%d.wordid=%d' % (wordcount,wordid)
