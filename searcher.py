@@ -52,15 +52,15 @@ class crawler:
 	def isindexed(self,url):
 		u=self.con.execute("select rowid from urltable where url='%s'" % url).fetchone()
 		if u!=None:
-			v=self.con.execute('select * from worldlocationinurl where urlid=%d' % u[0]).fetchone()
+			v=self.con.execute('select * from wordlocationinurl where urlid=%d' % u[0]).fetchone()
 			if v!=None: return True
 		return False
 	def addfromtolink(self,urlFrom,urlTo,linkText):
 		pass
 	def crawl(self,pages,depth=2):
 		for i in range(depth):
-				print 'Crawling %d:' % i 
-				newpages=set()
+			print 'Crawling %d:' % i 
+			newpages=set()
 			for page in pages:
 				try:
 					c=urllib2.urlopen(page)
@@ -94,3 +94,36 @@ class crawler:
 		self.con.execute('create index urltoidx on linktable(toid)')
 		self.con.execute('create index urlfromidx on linktable(fromid)')
 		self.dbcommit()
+
+class querying:
+	def __init__(self,dbname):
+		self.conn=sqlite.connect(dbname)
+		
+	def __del__(self):
+		self.conn.close()
+
+	def doquery(self,querystring):
+		qstring=querystring.strip()
+		wordlist=qstring.split(' ')
+		wordidlist=[]
+		fields='word0.urlid'
+		tables=''
+		clauses=''
+		
+		wordcount=0
+		for word in wordlist:
+			wordrow=self.conn.execute(
+				"select rowid from wordtable where word='%s'" % word).fetchone()
+			if wordrow!=None:
+				wordid=wordrow[0]
+				wordidlist.append(wordid)
+				if wordcount>0:
+				
+				fields+=',word%d.location' % wordcount
+				tables+='wordlocationinurl word%d' % wordcount
+				clauses+='word%d.wordid=%d' % (wordcount,wordid)
+				wordcount+=1
+		queryrow=self.conn.execute('select %s from %s where %s' % (fields,tables,clauses))
+		result=[row for row in queryrow]
+		return result,wordidlist
+		
