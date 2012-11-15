@@ -10,14 +10,14 @@ This project includes frameworks of some intelligent applications:recommender sy
 	recommender
 	dataclustering
 #Details
-	##recommendersystem
+	#recommendersystem
 		1)user-based
 		2)item-based
 		3)dataset:movielens
 		4)similaritymeasure:Euclidean distance,Pearson correlation
-	##informationretrieval
+	#informationretrieval
 		1)use BeautifulSoup and urllib2 to parse the .html
 		2)urlscore is based on wordfrequency or wordlocation 
-	##dataclustering
+	#dataclustering
 		1)hierarchical clustering
 		2)K-means clustering
