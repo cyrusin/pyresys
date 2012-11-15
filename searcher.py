@@ -125,8 +125,8 @@ class querying:
 				tables+='wordlocationinurl word%d' % wordcount
 				clauses+='word%d.wordid=%d' % (wordcount,wordid)
 				wordcount+=1
-		queryrow=self.conn.execute('select %s from %s where %s' % (fields,tables,clauses))
-		result=[row for row in queryrow]
+		queryrows=self.conn.execute('select %s from %s where %s' % (fields,tables,clauses))
+		result=[row for row in queryrows]
 		return result,wordidlist
 	
 	def geturlname(self,urlid):
@@ -169,3 +169,10 @@ class querying:
 			locationsum=sum(row[1:])
 			if locationsum<wordlocationdict[row[0]]: wordlocationdict[row[0]]=locationsum
 		return self.normalize(wordlocationdict,smallflag=1)	
+	def worddist(self,rows):
+		if len(rows[0])<=2: return dict([(row[0],1.0) for row in rows])
+		distances=dict([(row[0],100000) for row in rows])
+		for row in rows:
+			tempdist=sum([abs(row[i]-row[i-1]) for i in range(2,len(row))])
+			if tempdist<distances[row[0]]: distances[row[0]]=tempdist
+		return self.normalize(distances,smallflag=1)
