@@ -3,7 +3,7 @@ import re
 import sqlite3 as sqlite
 from bs4 import BeautifulSoup
 from urlparse import urljoin
-ignorewords=set(['the','of','to','and','a','in','is','it'])
+#ignorewords=set(['the','of','to','and','a','in','is','it','this','that','by','so'])
 class crawler:
 	def __init__(self,dbname):
 		self.con=sqlite.connect(dbname)
@@ -128,4 +128,44 @@ class querying:
 		queryrow=self.conn.execute('select %s from %s where %s' % (fields,tables,clauses))
 		result=[row for row in queryrow]
 		return result,wordidlist
-		
+	
+	def geturlname(self,urlid):
+		if urlid != None:
+			return self.conn.execute(
+				"select url from urltable where rowid=%d" % urlid).fetchone()[0]
+
+	def geturlscoredict(self,queryrows,wordidlist):
+		urlscoredict=dict([(row[0],0) for row in queryrows])
+		weights=[(1.0,self.wordlocation(queryrows))]
+		for (weight,scores) in weights:
+			for url in urlscoredict:
+				urlscoredict[url]+=weight*scores[url]
+		return urlscoredict	
+	def queryrank(self,querystring):
+		queryrows,wordidlist=self.doquery(querystring)
+		totalscores=self.geturlscoredict(queryrows,wordidlist)
+		rankscores=sorted([(score,urlid) for (urlid,score) in totalscores.items()],reverse=1)
+		for (score,urlid) in rankscores[0:10]:
+			print '%f\t%s' % (score,self.geturlname(urlid)) 
+
+	def normalize(self,scores,smallflag=0):
+		v=0.00001
+		if smallflag:
+			minscore=min(scores.values())
+			return dict([(url,float(minscore)/max(v,evl)) for (url,evl) in scores.items()])
+		else:
+			maxscore=max(scores.values())
+			if maxscore==0: maxscore=v
+			return dict([(url,float(evl)/maxscore) for (url,evl) in scores.items()])
+
+	def wordfrequency(self,rows):
+		counts=dict([(row[0],0) for row in rows])
+		for row in rows: counts[row[0]]+=1
+		return self.normalize(counts)
+
+	def wordlocation(self,rows):
+		wordlocationdict=dict([(row[0],100000) for row in rows])
+		for row in rows:
+			locationsum=sum(row[1:])
+			if locationsum<wordlocationdict[row[0]]: wordlocationdict[row[0]]=locationsum
+		return self.normalize(wordlocationdict,smallflag=1)	
