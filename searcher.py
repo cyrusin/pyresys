@@ -3,7 +3,7 @@ import re
 import sqlite3 as sqlite
 from bs4 import BeautifulSoup
 from urlparse import urljoin
-#ignorewords=set(['the','of','to','and','a','in','is','it','this','that','by','so'])
+ignorewords=set(['the','of','to','and','a','in','is','it','this','that','by','so'])
 class crawler:
 	def __init__(self,dbname):
 		self.con=sqlite.connect(dbname)
@@ -56,7 +56,9 @@ class crawler:
 			if v!=None: return True
 		return False
 	def addfromtolink(self,urlFrom,urlTo,linkText):
-		pass
+		fromid=self.getentryid('urltable','url',urlFrom)
+		toid=self.getentryid('urltable','url',urlTo)
+		self.con.execute('insert into linktable(fromid,toid) values(%d,%d)' %(fromid,toid))
 	def crawl(self,pages,depth=2):
 		for i in range(depth):
 			print 'Crawling %d:' % i 
@@ -104,16 +106,16 @@ class querying:
 
 	def doquery(self,querystring):
 		qstring=querystring.strip()
-		wordlist=qstring.split(' ')
+		wordlist=querystring.split(' ')
 		wordidlist=[]
+		lost=[]
 		fields='word0.urlid'
 		tables=''
 		clauses=''
 		
 		wordcount=0
 		for word in wordlist:
-			wordrow=self.conn.execute(
-				"select rowid from wordtable where word='%s'" % word).fetchone()
+			wordrow=self.conn.execute("select rowid from wordtable where word='%s'" % word).fetchone()
 			if wordrow!=None:
 				wordid=wordrow[0]
 				wordidlist.append(wordid)
@@ -125,8 +127,19 @@ class querying:
 				tables+='wordlocationinurl word%d' % wordcount
 				clauses+='word%d.wordid=%d' % (wordcount,wordid)
 				wordcount+=1
+			else:
+				lost.append(word)
+
+		if len(wordidlist)==0: 
+			print 'No Result!'
+			return  
+		if len(wordidlist)<len(wordlist):
+			print 'Lost some words:'
+			print lost
+		print 'select %s from %s where %s' %(fields,tables,clauses)
 		queryrows=self.conn.execute('select %s from %s where %s' % (fields,tables,clauses))
 		result=[row for row in queryrows]
+		print 'Result:%d' %(len(result)-1)
 		return result,wordidlist
 	
 	def geturlname(self,urlid):
@@ -136,13 +149,18 @@ class querying:
 
 	def geturlscoredict(self,queryrows,wordidlist):
 		urlscoredict=dict([(row[0],0) for row in queryrows])
-		weights=[(0.6,self.wordlocation(queryrows)),(0.4,self.worddist(queryrows))]
+		#weights=[(0.6,self.wordlocation(queryrows)),(0.4,self.worddist(queryrows))]
+		weights=[(1.0,self.countinboundlink(queryrows))]
 		for (weight,scores) in weights:
 			for url in urlscoredict:
 				urlscoredict[url]+=weight*scores[url]
 		return urlscoredict	
 	def queryrank(self,querystring):
-		queryrows,wordidlist=self.doquery(querystring)
+		o=self.doquery(querystring)
+		if o==None: 
+			print 'Failed to search.'
+			return
+		queryrows,wordidlist=o 
 		totalscores=self.geturlscoredict(queryrows,wordidlist)
 		rankscores=sorted([(score,urlid) for (urlid,score) in totalscores.items()],reverse=1)
 		for (score,urlid) in rankscores[0:20]:
@@ -176,3 +194,13 @@ class querying:
 			tempdist=sum([abs(row[i]-row[i-1]) for i in range(2,len(row))])
 			if tempdist<distances[row[0]]: distances[row[0]]=tempdist
 		return self.normalize(distances,smallflag=1)
+
+
+	def countinboundlink(self,rows):
+		allurls=set([row[0] for row in rows])
+		urlnumlist=[]
+		for url in allurls:
+			urlnumlist.append((url,self.conn.execute(
+						"select count(*) from linktable where toid=%d" %url).fetchone()[0]))
+		inboundnum=dict(urlnumlist)
+		return self.normalize(inboundnum)
