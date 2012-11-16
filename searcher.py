@@ -136,7 +136,7 @@ class querying:
 
 	def geturlscoredict(self,queryrows,wordidlist):
 		urlscoredict=dict([(row[0],0) for row in queryrows])
-		weights=[(1.0,self.wordlocation(queryrows))]
+		weights=[(0.6,self.wordlocation(queryrows)),(0.4,self.worddist(queryrows))]
 		for (weight,scores) in weights:
 			for url in urlscoredict:
 				urlscoredict[url]+=weight*scores[url]
@@ -145,7 +145,7 @@ class querying:
 		queryrows,wordidlist=self.doquery(querystring)
 		totalscores=self.geturlscoredict(queryrows,wordidlist)
 		rankscores=sorted([(score,urlid) for (urlid,score) in totalscores.items()],reverse=1)
-		for (score,urlid) in rankscores[0:10]:
+		for (score,urlid) in rankscores[0:20]:
 			print '%f\t%s' % (score,self.geturlname(urlid)) 
 
 	def normalize(self,scores,smallflag=0):
