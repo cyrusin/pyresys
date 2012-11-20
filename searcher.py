@@ -139,7 +139,8 @@ class querying:
 		print 'select %s from %s where %s' %(fields,tables,clauses)
 		queryrows=self.conn.execute('select %s from %s where %s' % (fields,tables,clauses))
 		result=[row for row in queryrows]
-		print 'Result:%d' %(len(result)-1)
+		resultset=set([row[0] for row in result])
+		print 'Result:%d' %(len(resultset))
 		return result,wordidlist
 	
 	def geturlname(self,urlid):
@@ -217,3 +218,6 @@ class querying:
 						"select count(*) from linktable where toid=%d" %url).fetchone()[0]))
 		inboundnum=dict(urlnumlist)
 		return self.normalize(inboundnum)
+	def totalUrl(self):
+		numOfUrl=self.conn.execute('select count(*) from urltable').fetchone()[0]
+		print 'total webpages:',numOfUrl
