@@ -149,18 +149,19 @@ class querying:
 
 	def geturlscoredict(self,queryrows,wordidlist):
 		urlscoredict=dict([(row[0],0) for row in queryrows])
-		#weights=[(0.6,self.wordlocation(queryrows)),(0.4,self.worddist(queryrows))]
-		weights=[(1.0,self.countinboundlink(queryrows))]
+		weights=[(0.6,self.wordlocation(queryrows)),(0.4,self.worddist(queryrows))]
+		#weights=[(1.0,self.countinboundlink(queryrows))]
+		#weights=[(1.0,self.wordfrequencyratio(queryrows,wordidlist))]
 		for (weight,scores) in weights:
 			for url in urlscoredict:
 				urlscoredict[url]+=weight*scores[url]
 		return urlscoredict	
 	def queryrank(self,querystring):
-		o=self.doquery(querystring)
-		if o==None: 
+		out=self.doquery(querystring)
+		if out==None: 
 			print 'Failed to search.'
 			return
-		queryrows,wordidlist=o 
+		queryrows,wordidlist=out 
 		totalscores=self.geturlscoredict(queryrows,wordidlist)
 		rankscores=sorted([(score,urlid) for (urlid,score) in totalscores.items()],reverse=1)
 		for (score,urlid) in rankscores[0:20]:
@@ -181,6 +182,18 @@ class querying:
 		for row in rows: counts[row[0]]+=1
 		return self.normalize(counts)
 
+	def wordfrequencyratio(self,rows,wordidlist):
+		total=dict([(row[0],0) for row in rows])
+		wordfreq=[]
+		for urlid in total.keys():
+			total[urlid]=self.conn.execute("select count(*) from wordlocationinurl where urlid=%d" % urlid).fetchone()[0]
+			for wordid in wordidlist:
+				wordfreq.append(self.conn.execute("select count(*) from wordlocationinurl where wordid=%d and urlid=%d" % (wordid,urlid)).fetchone()[0])
+			temp=min(wordfreq)
+			total[urlid]=float(temp)/total[urlid]
+		return self.normalize(total)
+						
+				
 	def wordlocation(self,rows):
 		wordlocationdict=dict([(row[0],100000) for row in rows])
 		for row in rows:
