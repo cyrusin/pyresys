@@ -96,6 +96,24 @@ class crawler:
 		self.con.execute('create index urltoidx on linktable(toid)')
 		self.con.execute('create index urlfromidx on linktable(fromid)')
 		self.dbcommit()
+	def getpagerank(self,iters=10):
+		self.con.execute('drop table if exists prtable')
+		self.con.execute('create table prtable(urlid primary key,prvalue)')
+		self.con.execute('insert into prtable select rowid,1.0 from urltable')
+		self.dbcommit()
+		
+		for i in range(iters):
+			print 'Iteration: %d' % (i)
+			urls=[row[0] for row in self.con.execute('select rowid from urltable')]
+			for url in urls:
+				pr=0.15
+				urltothis=[row[0] for row in self.con.execute('select distinct fromid from linktable where toid=%d' % url)]
+				for link in urltothis:
+					outlinknum=self.con.execute('select count(*) from linktable where fromid=%d' % link).fetchone()[0]
+					linkpr=self.con.execute('select prvalue from prtable where urlid=%d' % link).fetchone()[0]
+					pr+=0.85*(linkpr/outlinknum)
+				self.con.execute('update prtable set prvalue=%f where urlid=%d' % (pr,url))
+			self.dbcommit()
 
 class querying:
 	def __init__(self,dbname):
