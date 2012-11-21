@@ -114,6 +114,7 @@ class crawler:
 					pr+=0.85*(linkpr/outlinknum)
 				self.con.execute('update prtable set prvalue=%f where urlid=%d' % (pr,url))
 			self.dbcommit()
+	
 
 class querying:
 	def __init__(self,dbname):
@@ -168,9 +169,10 @@ class querying:
 
 	def geturlscoredict(self,queryrows,wordidlist):
 		urlscoredict=dict([(row[0],0) for row in queryrows])
-		weights=[(0.6,self.wordlocation(queryrows)),(0.4,self.worddist(queryrows))]
+		#weights=[(0.6,self.wordlocation(queryrows)),(0.4,self.worddist(queryrows))]
 		#weights=[(1.0,self.countinboundlink(queryrows))]
 		#weights=[(1.0,self.wordfrequencyratio(queryrows,wordidlist))]
+		weights=[(1.0,self.wordlocation(queryrows)),(1.0,self.wordfrequency(queryrows)),(1.0,self.usepagerank(queryrows))]
 		for (weight,scores) in weights:
 			for url in urlscoredict:
 				urlscoredict[url]+=weight*scores[url]
@@ -226,6 +228,17 @@ class querying:
 			tempdist=sum([abs(row[i]-row[i-1]) for i in range(2,len(row))])
 			if tempdist<distances[row[0]]: distances[row[0]]=tempdist
 		return self.normalize(distances,smallflag=1)
+	def usepagerank(self,rows):
+		if rows==None:
+			print 'Something wrong with usepagerank()!'
+			return
+		prscore=dict([(row[0],0) for row in rows])
+		for url in prscore:
+			prscore[url]=self.conn.execute('select prvalue from prtable where urlid=%d' % url).fetchone()[0]
+		maxvalue=max([prscore[x] for x in prscore])
+		for url in prscore:
+			prscore[url]=prscore[url]/maxvalue
+		return prscore
 
 
 	def countinboundlink(self,rows):
