@@ -3,42 +3,42 @@ import re
 import sqlite3 as sqlite
 from bs4 import BeautifulSoup
 from urlparse import urljoin
-ignorewords=set(['the','of','to','and','a','in','is','it','this','that','by','so'])
+ignorewords = set(['the','of','to','and','a','in','is','it','this','that','by','so'])
 class crawler:
-	def __init__(self,dbname):
-		self.con=sqlite.connect(dbname)
+	def __init__(self, dbname):
+		self.con = sqlite.connect(dbname)
 		
 	def __del__(self):
 		self.con.close()
 	def dbcommit(self):
 		self.con.commit()
-	def getentryid(self,table,field,value,addnew=True):
-		cursor=self.con.execute("select rowid from %s where %s='%s'" % (table,field,value))
-		record=cursor.fetchone()
-		if record==None:
-			cursor=self.con.execute("insert into %s (%s) values ('%s')" % (table,field,value))
+	def getentryid(self, table, field, value, addnew=True):
+		cursor = self.con.execute("select rowid from %s where %s='%s'" % (table, field, value))
+		record = cursor.fetchone()
+		if record == None:
+			cursor = self.con.execute("insert into %s (%s) values ('%s')" % (table, field, value))
 			return cursor.lastrowid
 		else:
 			return record[0]
-	def createindex(self,url,soup):
+	def createindex(self, url, soup):
 		if self.isindexed(url): return 
 		print 'Indexing '+url
 		
-		textfromurl=self.gettext(soup)
-		words=self.sprwords(textfromurl)
-		urlid=self.getentryid('urltable','url',url)
+		textfromurl = self.gettext(soup)
+		words = self.sprwords(textfromurl)
+		urlid = self.getentryid('urltable', 'url', url)
 		for i in range(len(words)):
-			word=words[i]
+			word = words[i]
 			if word in ignorewords: continue
-			wordid=self.getentryid('wordtable','word',word)
-			self.con.execute("insert into wordlocationinurl(urlid,wordid,location) values (%d,%d,%d)" % (urlid,wordid,i))
+			wordid = self.getentryid('wordtable', 'word', word)
+			self.con.execute("insert into wordlocationinurl(urlid, wordid, location) values (%d, %d, %d)" % (urlid, wordid, i))
 		
-	def gettext(self,soup):
-		cstring=soup.string
+	def gettext(self, soup):
+		cstring = soup.string
 		print type(cstring)
-		if cstring==None:
-			spcontents=soup.contents
-			result=''
+		if cstring == None:
+			spcontents = soup.contents
+			result = ''
 			for content in  spcontents:
 				result=result+self.gettext(content)+'\n'
 			return result
@@ -46,44 +46,44 @@ class crawler:
 			return cstring.strip()
 
 	def sprwords(self,text):
-		splitter=re.compile('\\W*')
+		splitter = re.compile('\\W*')
 		return [s.lower() for s in splitter.split(text) if s!='']
 
-	def isindexed(self,url):
-		u=self.con.execute("select rowid from urltable where url='%s'" % url).fetchone()
-		if u!=None:
-			v=self.con.execute('select * from wordlocationinurl where urlid=%d' % u[0]).fetchone()
-			if v!=None: return True
+	def isindexed(self, url):
+		u = self.con.execute("select rowid from urltable where url='%s'" % url).fetchone()
+		if u != None:
+			v = self.con.execute('select * from wordlocationinurl where urlid=%d' % u[0]).fetchone()
+			if v != None: return True
 		return False
-	def addfromtolink(self,urlFrom,urlTo,linkText):
-		fromid=self.getentryid('urltable','url',urlFrom)
-		toid=self.getentryid('urltable','url',urlTo)
-		self.con.execute('insert into linktable(fromid,toid) values(%d,%d)' %(fromid,toid))
-	def crawl(self,pages,depth=2):
+	def addfromtolink(self, urlFrom, urlTo, linkText):
+		fromid=self.getentryid('urltable', 'url', urlFrom)
+		toid=self.getentryid('urltable', 'url', urlTo)
+		self.con.execute('insert into linktable(fromid, toid) values(%d, %d)' %(fromid, toid))
+	def crawl(self, pages, depth=2):
 		for i in range(depth):
 			print 'Crawling %d:' % i 
-			newpages=set()
+			newpages = set()
 			for page in pages:
 				try:
 					c=urllib2.urlopen(page)
 				except:
 					print 'Failed to open url:%s' % page
 					continue	
-				soup=BeautifulSoup(c.read())
-				self.createindex(page,soup)
-				links=soup.find_all('a')
+				soup = BeautifulSoup(c.read())
+				self.createindex(page, soup)
+				links = soup.find_all('a')
 				for link in links:
 					if('href' in dict(link.attrs)):
-						url=urljoin(page,link['href'])
-						if url.find("'")!=-1: continue
-						url=url.split('#')[0]
-						if url[0:4]=='http' and not self.isindexed(url):
+						url = urljoin(page, link['href'])
+						if url.find("'") != -1: continue
+						url = url.split('#')[0]
+						if url[0:4] == 'http' and not self.isindexed(url):
 							newpages.add(url)
-						linkText=self.gettext(link)
-						self.addfromtolink(page,url,linkText)
+						linkText = self.gettext(link)
+						self.addfromtolink(page, url, linkText)
 				
 				self.dbcommit()
-			pages=newpages	
+			pages = newpages	
 	def createindextables(self):
 		self.con.execute('create table urltable(url)')
 		self.con.execute('create table wordtable(word)')
@@ -96,7 +96,7 @@ class crawler:
 		self.con.execute('create index urltoidx on linktable(toid)')
 		self.con.execute('create index urlfromidx on linktable(fromid)')
 		self.dbcommit()
-	def getpagerank(self,iters=10):
+	def getpagerank(self, iters=10):
 		self.con.execute('drop table if exists prtable')
 		self.con.execute('create table prtable(urlid primary key,prvalue)')
 		self.con.execute('insert into prtable select rowid,1.0 from urltable')
@@ -104,151 +104,151 @@ class crawler:
 		
 		for i in range(iters):
 			print 'Iteration: %d' % (i)
-			urls=[row[0] for row in self.con.execute('select rowid from urltable')]
+			urls = [row[0] for row in self.con.execute('select rowid from urltable')]
 			for url in urls:
-				pr=0.15
-				urltothis=[row[0] for row in self.con.execute('select distinct fromid from linktable where toid=%d' % url)]
+				pr = 0.15
+				urltothis = [row[0] for row in self.con.execute('select distinct fromid from linktable where toid=%d' % url)]
 				for link in urltothis:
-					outlinknum=self.con.execute('select count(*) from linktable where fromid=%d' % link).fetchone()[0]
-					linkpr=self.con.execute('select prvalue from prtable where urlid=%d' % link).fetchone()[0]
-					pr+=0.85*(linkpr/outlinknum)
-				self.con.execute('update prtable set prvalue=%f where urlid=%d' % (pr,url))
+					outlinknum = self.con.execute('select count(*) from linktable where fromid=%d' % link).fetchone()[0]
+					linkpr = self.con.execute('select prvalue from prtable where urlid=%d' % link).fetchone()[0]
+					pr += 0.85*(linkpr/outlinknum)
+				self.con.execute('update prtable set prvalue=%f where urlid=%d' % (pr, url))
 			self.dbcommit()
 	
 
 class querying:
-	def __init__(self,dbname):
-		self.conn=sqlite.connect(dbname)
+	def __init__(self, dbname):
+		self.conn = sqlite.connect(dbname)
 		
 	def __del__(self):
 		self.conn.close()
 
-	def doquery(self,querystring):
-		qstring=querystring.strip()
-		wordlist=querystring.split(' ')
-		wordidlist=[]
-		lost=[]
-		fields='word0.urlid'
-		tables=''
-		clauses=''
-		
-		wordcount=0
+	def doquery(self, querystring):
+		qstring = querystring.strip()
+		wordlist = querystring.split(' ')
+		wordidlist = []
+		lost = []
+		fields = 'word0.urlid'
+		tables = ''
+		clauses = ''
+		wordcount = 0
+
 		for word in wordlist:
-			wordrow=self.conn.execute("select rowid from wordtable where word='%s'" % word).fetchone()
-			if wordrow!=None:
-				wordid=wordrow[0]
+			wordrow = self.conn.execute("select rowid from wordtable where word='%s'" % word).fetchone()
+			if wordrow != None:
+				wordid = wordrow[0]
 				wordidlist.append(wordid)
-				if wordcount>0:
-					tables+=','
-					clauses+=' and '
-					clauses+='word%d.urlid=word%d.urlid and ' % (wordcount-1,wordcount)	
-				fields+=',word%d.location' % wordcount
-				tables+='wordlocationinurl word%d' % wordcount
-				clauses+='word%d.wordid=%d' % (wordcount,wordid)
-				wordcount+=1
+				if wordcount > 0:
+					tables += ','
+					clauses += ' and '
+					clauses += 'word%d.urlid=word%d.urlid and ' % (wordcount-1, wordcount)	
+				fields += ',word%d.location' % wordcount
+				tables += 'wordlocationinurl word%d' % wordcount
+				clauses += 'word%d.wordid=%d' % (wordcount, wordid)
+				wordcount += 1
 			else:
 				lost.append(word)
 
-		if len(wordidlist)==0: 
+		if len(wordidlist) == 0: 
 			print 'No Result!'
 			return  
-		if len(wordidlist)<len(wordlist):
+		if len(wordidlist) < len(wordlist):
 			print 'Lost some words:'
 			print lost
-		print 'select %s from %s where %s' %(fields,tables,clauses)
-		queryrows=self.conn.execute('select %s from %s where %s' % (fields,tables,clauses))
-		result=[row for row in queryrows]
-		resultset=set([row[0] for row in result])
+		print 'select %s from %s where %s' %(fields, tables, clauses)
+		queryrows = self.conn.execute('select %s from %s where %s' % (fields, tables, clauses))
+		result = [row for row in queryrows]
+		resultset = set([row[0] for row in result])
 		print 'Result:%d' %(len(resultset))
-		return result,wordidlist
+		return result, wordidlist
 	
-	def geturlname(self,urlid):
+	def geturlname(self, urlid):
 		if urlid != None:
 			return self.conn.execute(
 				"select url from urltable where rowid=%d" % urlid).fetchone()[0]
 
-	def geturlscoredict(self,queryrows,wordidlist):
-		urlscoredict=dict([(row[0],0) for row in queryrows])
+	def geturlscoredict(self, queryrows, wordidlist):
+		urlscoredict = dict([(row[0], 0) for row in queryrows])
 		#weights=[(0.6,self.wordlocation(queryrows)),(0.4,self.worddist(queryrows))]
 		#weights=[(1.0,self.countinboundlink(queryrows))]
 		#weights=[(1.0,self.wordfrequencyratio(queryrows,wordidlist))]
-		weights=[(1.0,self.wordlocation(queryrows)),(1.0,self.wordfrequency(queryrows)),(1.0,self.usepagerank(queryrows))]
-		for (weight,scores) in weights:
+		weights = [(1.0, self.wordlocation(queryrows)), (1.0, self.wordfrequency(queryrows)), (1.0, self.usepagerank(queryrows))]
+		for (weight, scores) in weights:
 			for url in urlscoredict:
-				urlscoredict[url]+=weight*scores[url]
+				urlscoredict[url] += weight*scores[url]
 		return urlscoredict	
 	def queryrank(self,querystring):
-		out=self.doquery(querystring)
-		if out==None: 
+		out = self.doquery(querystring)
+		if out == None: 
 			print 'Failed to search.'
 			return
-		queryrows,wordidlist=out 
-		totalscores=self.geturlscoredict(queryrows,wordidlist)
-		rankscores=sorted([(score,urlid) for (urlid,score) in totalscores.items()],reverse=1)
-		for (score,urlid) in rankscores[0:20]:
-			print '%f\t%s' % (score,self.geturlname(urlid)) 
+		queryrows, wordidlist = out 
+		totalscores = self.geturlscoredict(queryrows, wordidlist)
+		rankscores = sorted([(score, urlid) for (urlid, score) in totalscores.items()], reverse=1)
+		for (score, urlid) in rankscores[0:20]:
+			print '%f\t%s' % (score, self.geturlname(urlid)) 
 
-	def normalize(self,scores,smallflag=0):
-		v=0.00001
+	def normalize(self, scores, smallflag=0):
+		v = 0.00001
 		if smallflag:
-			minscore=min(scores.values())
-			return dict([(url,float(minscore)/max(v,evl)) for (url,evl) in scores.items()])
+			minscore = min(scores.values())
+			return dict([(url, float(minscore)/max(v, evl)) for (url, evl) in scores.items()])
 		else:
-			maxscore=max(scores.values())
-			if maxscore==0: maxscore=v
-			return dict([(url,float(evl)/maxscore) for (url,evl) in scores.items()])
+			maxscore = max(scores.values())
+			if maxscore == 0: maxscore = v
+			return dict([(url, float(evl)/maxscore) for (url, evl) in scores.items()])
 
-	def wordfrequency(self,rows):
-		counts=dict([(row[0],0) for row in rows])
-		for row in rows: counts[row[0]]+=1
+	def wordfrequency(self, rows):
+		counts = dict([(row[0], 0) for row in rows])
+		for row in rows: counts[row[0]] += 1
 		return self.normalize(counts)
 
-	def wordfrequencyratio(self,rows,wordidlist):
-		total=dict([(row[0],0) for row in rows])
-		wordfreq=[]
+	def wordfrequencyratio(self, rows, wordidlist):
+		total = dict([(row[0], 0) for row in rows])
+		wordfreq = []
 		for urlid in total.keys():
-			total[urlid]=self.conn.execute("select count(*) from wordlocationinurl where urlid=%d" % urlid).fetchone()[0]
+			total[urlid] = self.conn.execute("select count(*) from wordlocationinurl where urlid=%d" % urlid).fetchone()[0]
 			for wordid in wordidlist:
-				wordfreq.append(self.conn.execute("select count(*) from wordlocationinurl where wordid=%d and urlid=%d" % (wordid,urlid)).fetchone()[0])
-			temp=min(wordfreq)
-			total[urlid]=float(temp)/total[urlid]
+				wordfreq.append(self.conn.execute("select count(*) from wordlocationinurl where wordid=%d and urlid=%d" % (wordid, urlid)).fetchone()[0])
+			temp = min(wordfreq)
+			total[urlid] = float(temp)/total[urlid]
 		return self.normalize(total)
 						
 				
-	def wordlocation(self,rows):
-		wordlocationdict=dict([(row[0],100000) for row in rows])
+	def wordlocation(self, rows):
+		wordlocationdict = dict([(row[0], 100000) for row in rows])
 		for row in rows:
-			locationsum=sum(row[1:])
-			if locationsum<wordlocationdict[row[0]]: wordlocationdict[row[0]]=locationsum
-		return self.normalize(wordlocationdict,smallflag=1)	
-	def worddist(self,rows):
-		if len(rows[0])<=2: return dict([(row[0],1.0) for row in rows])
-		distances=dict([(row[0],100000) for row in rows])
+			locationsum = sum(row[1:])
+			if locationsum < wordlocationdict[row[0]]: wordlocationdict[row[0]] = locationsum
+		return self.normalize(wordlocationdict, smallflag = 1)	
+	def worddist(self, rows):
+		if len(rows[0]) <= 2: return dict([(row[0], 1.0) for row in rows])
+		distances = dict([(row[0], 100000) for row in rows])
 		for row in rows:
-			tempdist=sum([abs(row[i]-row[i-1]) for i in range(2,len(row))])
-			if tempdist<distances[row[0]]: distances[row[0]]=tempdist
-		return self.normalize(distances,smallflag=1)
-	def usepagerank(self,rows):
-		if rows==None:
+			tempdist = sum([abs(row[i]-row[i-1]) for i in range(2, len(row))])
+			if tempdist < distances[row[0]]: distances[row[0]] = tempdist
+		return self.normalize(distances, smallflag = 1)
+	def usepagerank(self, rows):
+		if rows == None:
 			print 'Something wrong with usepagerank()!'
 			return
-		prscore=dict([(row[0],0) for row in rows])
+		prscore = dict([(row[0], 0) for row in rows])
 		for url in prscore:
-			prscore[url]=self.conn.execute('select prvalue from prtable where urlid=%d' % url).fetchone()[0]
-		maxvalue=max([prscore[x] for x in prscore])
+			prscore[url] = self.conn.execute('select prvalue from prtable where urlid=%d' % url).fetchone()[0]
+		maxvalue = max([prscore[x] for x in prscore])
 		for url in prscore:
-			prscore[url]=prscore[url]/maxvalue
+			prscore[url] = prscore[url] / maxvalue
 		return prscore
 
 
-	def countinboundlink(self,rows):
-		allurls=set([row[0] for row in rows])
-		urlnumlist=[]
+	def countinboundlink(self, rows):
+		allurls = set([row[0] for row in rows])
+		urlnumlist = []
 		for url in allurls:
-			urlnumlist.append((url,self.conn.execute(
+			urlnumlist.append((url, self.conn.execute(
 						"select count(*) from linktable where toid=%d" %url).fetchone()[0]))
-		inboundnum=dict(urlnumlist)
+		inboundnum = dict(urlnumlist)
 		return self.normalize(inboundnum)
 	def totalUrl(self):
-		numOfUrl=self.conn.execute('select count(*) from urltable').fetchone()[0]
-		print 'total webpages:',numOfUrl
+		numOfUrl = self.conn.execute('select count(*) from urltable').fetchone()[0]
+		print 'total webpages:', numOfUrl
