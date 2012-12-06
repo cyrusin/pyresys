@@ -1,17 +1,36 @@
+#!/usr/bin/env python
+# 
+# Using the code does not require permission,unless you incorporate 
+# a significant amount of it into your product for commercial profit.
+#
+# Author: Li Shuai
+# URL: www.douban.com/people/mixlee
+#
+# Time: 2012-12-06
+
+"""The webcrawler and information retrieval tools."""
+
+
 import urllib2
 import re
-import sqlite3 as sqlite
-from bs4 import BeautifulSoup
 from urlparse import urljoin
+import sqlite3 as sqlite
+
+from bs4 import BeautifulSoup # The third party module.
+
+# Stop-words used to parse the webpage,use a larger set to replace it. 
 ignorewords = set(['the','of','to','and','a','in','is','it','this','that','by','so'])
+
 class crawler:
+    
 	def __init__(self, dbname):
 		self.con = sqlite.connect(dbname)
-		
 	def __del__(self):
 		self.con.close()
+
 	def dbcommit(self):
 		self.con.commit()
+
 	def getentryid(self, table, field, value, addnew=True):
 		cursor = self.con.execute("select rowid from %s where %s='%s'" % (table, field, value))
 		record = cursor.fetchone()
@@ -20,10 +39,10 @@ class crawler:
 			return cursor.lastrowid
 		else:
 			return record[0]
+
 	def createindex(self, url, soup):
 		if self.isindexed(url): return 
 		print 'Indexing '+url
-		
 		textfromurl = self.gettext(soup)
 		words = self.sprwords(textfromurl)
 		urlid = self.getentryid('urltable', 'url', url)
@@ -55,10 +74,12 @@ class crawler:
 			v = self.con.execute('select * from wordlocationinurl where urlid=%d' % u[0]).fetchone()
 			if v != None: return True
 		return False
+
 	def addfromtolink(self, urlFrom, urlTo, linkText):
 		fromid=self.getentryid('urltable', 'url', urlFrom)
 		toid=self.getentryid('urltable', 'url', urlTo)
 		self.con.execute('insert into linktable(fromid, toid) values(%d, %d)' %(fromid, toid))
+
 	def crawl(self, pages, depth=2):
 		for i in range(depth):
 			print 'Crawling %d:' % i 
@@ -84,6 +105,7 @@ class crawler:
 				
 				self.dbcommit()
 			pages = newpages	
+
 	def createindextables(self):
 		self.con.execute('create table urltable(url)')
 		self.con.execute('create table wordtable(word)')
@@ -96,6 +118,7 @@ class crawler:
 		self.con.execute('create index urltoidx on linktable(toid)')
 		self.con.execute('create index urlfromidx on linktable(fromid)')
 		self.dbcommit()
+
 	def getpagerank(self, iters=10):
 		self.con.execute('drop table if exists prtable')
 		self.con.execute('create table prtable(urlid primary key,prvalue)')
@@ -117,6 +140,7 @@ class crawler:
 	
 
 class querying:
+
 	def __init__(self, dbname):
 		self.conn = sqlite.connect(dbname)
 		
@@ -177,6 +201,7 @@ class querying:
 			for url in urlscoredict:
 				urlscoredict[url] += weight*scores[url]
 		return urlscoredict	
+
 	def queryrank(self,querystring):
 		out = self.doquery(querystring)
 		if out == None: 
@@ -221,6 +246,7 @@ class querying:
 			locationsum = sum(row[1:])
 			if locationsum < wordlocationdict[row[0]]: wordlocationdict[row[0]] = locationsum
 		return self.normalize(wordlocationdict, smallflag = 1)	
+
 	def worddist(self, rows):
 		if len(rows[0]) <= 2: return dict([(row[0], 1.0) for row in rows])
 		distances = dict([(row[0], 100000) for row in rows])
@@ -228,6 +254,7 @@ class querying:
 			tempdist = sum([abs(row[i]-row[i-1]) for i in range(2, len(row))])
 			if tempdist < distances[row[0]]: distances[row[0]] = tempdist
 		return self.normalize(distances, smallflag = 1)
+
 	def usepagerank(self, rows):
 		if rows == None:
 			print 'Something wrong with usepagerank()!'
@@ -240,7 +267,6 @@ class querying:
 			prscore[url] = prscore[url] / maxvalue
 		return prscore
 
-
 	def countinboundlink(self, rows):
 		allurls = set([row[0] for row in rows])
 		urlnumlist = []
@@ -249,6 +275,7 @@ class querying:
 						"select count(*) from linktable where toid=%d" %url).fetchone()[0]))
 		inboundnum = dict(urlnumlist)
 		return self.normalize(inboundnum)
+
 	def totalUrl(self):
 		numOfUrl = self.conn.execute('select count(*) from urltable').fetchone()[0]
 		print 'total webpages:', numOfUrl
