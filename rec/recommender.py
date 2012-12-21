@@ -1,7 +1,7 @@
-# dictionary of movie critics and their ratings of a small
-# set of movies
-#critics:type: dict;initialized by data like "'Jim':{'film_1':2.0,'film_2':3.0}"
-critics={name:{movie:score}...}
+'''
+This module has some useful functions for building a prototype of recommender system.
+You can test the algorithm using the data source of MovieLens.If you use other data sets, make sure they are in the correct format.
+'''
 
 
 from math import sqrt
@@ -43,6 +43,7 @@ def topMatches(prefs, person, n = 5, similarity = sim_pearson):
 	scores.sort()
 	scores.reverse()
 	return scores[0:n]
+
 def getRecommendations(prefs, person, similarity = sim_pearson):
 	totals = {}
 	simSums = {}
@@ -61,6 +62,7 @@ def getRecommendations(prefs, person, similarity = sim_pearson):
 	rankings.sort()
 	rankings.reverse()
 	return rankings
+
 def traneformPrefs(prefs):
 	result = {}
 	for person in prefs:
@@ -68,6 +70,7 @@ def traneformPrefs(prefs):
 			result.setdefault(item,{})
 			result[item][person] = prefs[person][item]
 	return result
+
 def calculateSimilarItems(prefs,n=10):
 	result = {}
 	itemPrefs=transformPrefs(prefs)
@@ -78,6 +81,7 @@ def calculateSimilarItems(prefs,n=10):
 		scores=topMatches(itemPrefs,item,n=n,similarity=sim_distance)
 		result[item] = scores
 	return result
+
 def getRecommendedItems(prefs, itemMatch, user):
 	userRatings = prefs[user]
 	scores = {}
@@ -93,6 +97,7 @@ def getRecommendedItems(prefs, itemMatch, user):
 	rankings.sort()
 	rankings.reverse()
 	return rankings
+
 def loadMovieLens(path):
 	movies = ()
 	for line in open(path):
