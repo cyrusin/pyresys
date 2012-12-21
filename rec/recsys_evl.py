@@ -3,7 +3,7 @@
 
 import math
 
-# root-mean-square error
+# RMSE:root-mean-square error
 def rmse(results):
     '''rmse(list) -> float
 
@@ -12,9 +12,20 @@ def rmse(results):
     results[i] : [uid, iid, rscore, pscore].
     '''
 
-    return math.sqrt(
-            sum([pow(rscore-pscore, 2) for uid, iid,  rscore, prcore in results])
+    return math.sqrt(\
+            sum([pow(rscore-pscore, 2) for uid, iid,  rscore, prcore in results])\
             / float(len(results)))
 
+# MAE:mean-absolute error
+def mae(results):
+    '''mae(list) -> float
+
+    Get mean-absolute error from input list of recommendation relults.
+    type of results : list.
+    results[i] : [uid, iid, rscore, pscore].
+    '''
+
+    return sum([abs(rscore-pscore) for uid, iid, rscore, pscore in results])\
+            / float(len(results))
 
 
