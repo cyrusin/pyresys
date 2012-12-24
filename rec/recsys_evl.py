@@ -42,6 +42,40 @@ def get_pecision_recall(n_result, test):
         n_precision += len(n_result[user])
         n_recall += len(test[user])
 
-    return hit / (float)n_precision, hit / (float)n_recall
+    return 'precision: %f, recall: %f' % (hit / (float)n_precision, hit / (float)n_recall)
     
-        
+# Evaluate the coverage of the recommend system
+def get_coverage(result, items):
+    '''get_coverage(dict, list) -> string
+    
+    This will compute the coverage of the result, and the coverage really tells the ability of discovering the long tail item.
+    '''
+    result_iid = set() 
+    for iid in result.itervalues():
+        for i in iid:
+            result_iid.add(i)
+
+    return 'coverage: %f' % (len(items) / len(result_iid))
+
+# Get the popularity of the items
+def get_popularity(result, items):
+    '''get_popularity(dict, list) -> dict
+
+    This is will return the popularity of the items of the result.
+    '''
+    popularity = dict()
+    len_of_result = 0
+    for iid in result.itervalues():
+        for i in iid:
+            popularity.setdefault(i, 0)
+            popularity[i] += 1
+            len_of_result += 1
+
+    for iid in items:                                       
+        if iid not in popularity:                        
+            popularity.setdefault(iid, 0)                
+        else:                                            
+            popularity[iid] /= (float)len_of_result      
+
+    return popularity
+
