@@ -30,6 +30,10 @@ def mae(results):
 
 # Evaluate the result using precision & recall in (Top-N & 0-1) recommendation 
 def get_pecision_recall(n_result, test):
+    '''get_precision_recall(dict, dict) -> (float, float)
+
+    Get the precision and recall from input of recommend results compared to the test dataset. The dict contains 'uid : [itemid,...]'.
+    '''
     hit = 0
     n_precision = 0
     n_recall = 0
@@ -41,5 +45,3 @@ def get_pecision_recall(n_result, test):
     return hit / (float)n_precision, hit / (float)n_recall
     
         
-
-
