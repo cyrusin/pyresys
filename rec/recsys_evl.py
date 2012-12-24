@@ -28,4 +28,18 @@ def mae(results):
     return sum([abs(rscore-pscore) for uid, iid, rscore, pscore in results])\
             / float(len(results))
 
+# Evaluate the result using precision & recall in (Top-N & 0-1) recommendation 
+def get_pecision_recall(n_result, test):
+    hit = 0
+    n_precision = 0
+    n_recall = 0
+    for user, items in test.items():
+        hit  += len(n_result[user] & items)
+        n_precision += len(n_result[user])
+        n_recall += len(test[user])
+
+    return hit / (float)n_precision, hit / (float)n_recall
+    
+        
+
 
