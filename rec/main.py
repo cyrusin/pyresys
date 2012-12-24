@@ -12,7 +12,6 @@ path = '/home/gxb-hy/dataset/MovieLens/ml-100k/u.data'
 
 M = int(raw_input('Looping M:'))
 
-
 train, test = data_processing.get_train_test(path, M, 0, 1)
 
 with open('test.data', 'a') as f:
@@ -27,6 +26,5 @@ with open('test.data', 'a') as f:
                 f.write('\n')
             else:
                 f.write('\t')
-
 
 

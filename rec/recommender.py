@@ -75,7 +75,7 @@ def getRecommendations(prefs, person, similarity = get_pearson_sim):
 	rankings.reverse()
 	return rankings
 
-def traneformPrefs(prefs):
+def transformPrefs(prefs):
 	result = {}
 	for person in prefs:
 		for item in prefs[person]:

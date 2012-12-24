@@ -79,3 +79,43 @@ def get_popularity(result, items):
 
     return popularity
 
+# Get the recall of the experiment(Top-N)
+def get_recall(train, test, N, func):
+    '''get_recall(dict, dict, int, func) -> float
+
+    Return the recall of the recommendation compared to the test data.
+    Declare the N in the Top-N recommendation.
+    '''
+    hit = 0
+    num = 0
+    for u in train.keys():
+        tu = test[u]
+        result = func(u, N, train)
+        for item, pui in result:
+            if item in tu:
+                hit += 1
+
+        num += len(tu)
+
+    return 'Recall: %f' % hit / float(num)
+
+# Get the precision of the experiment(Top-N)
+def get_precision(train, test, N, func):
+    '''get_precision(dict, dict, int, func) -> float
+
+    Return the precision of the recommendation compared to the test data.
+    Declare the N in the Top-N recommendation.
+    '''
+    hit = 0
+    num = 0
+    for u in test.keys():
+        tu = train[user]
+        result = func(u, N, train)
+        for item, pui in result:
+            if item in test[u]:
+                hit += 1
+
+        num += len(tu)
+
+    return 'Precision: %f' % hit / float(num)
+
