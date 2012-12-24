@@ -42,7 +42,7 @@ def get_pecision_recall(n_result, test):
         n_precision += len(n_result[user])
         n_recall += len(test[user])
 
-    return 'precision: %f, recall: %f' % (hit / (float)n_precision, hit / (float)n_recall)
+    return 'precision: %f, recall: %f' % (hit / float(n_precision), hit / float(n_recall))
     
 # Evaluate the coverage of the recommend system
 def get_coverage(result, items):
@@ -75,7 +75,7 @@ def get_popularity(result, items):
         if iid not in popularity:                        
             popularity.setdefault(iid, 0)                
         else:                                            
-            popularity[iid] /= (float)len_of_result      
+            popularity[iid] /= float(len_of_result)      
 
     return popularity
 
