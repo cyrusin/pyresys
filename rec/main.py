@@ -11,12 +11,14 @@ import data_processing
 #path = '/home/gxb-hy/dataset/MovieLens/ml-100k/u.data'
 path = '/home/lishuai/dataset/MovieLens/ml-100k/u.data'
 
-M = int(raw_input('Looping M:')) # loopting times, M-fold cross validation
+# loopting times, M-fold cross validation
+M = int(raw_input('Looping M:')) 
 
 train, test = data_processing.get_train_test(path, M, 0, 1)
 
+# test.data is used to store the temp test data
 with open('test.data', 'a') as f:
-    for k, v in test:
+    for k in test:
         f.write(k)
         f.write('\t')
         count = 0
