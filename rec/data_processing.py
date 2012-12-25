@@ -17,13 +17,13 @@ def get_train_test(path, M, k, seed):
 
     with open(path) as f:
         for line in f:
-            user, item = line.split('\t')[0:2]
+            user, item, rating = line.split('\t')[0:3]
             if random.randint(0, M) == k:
-                test.setdefault(user, [])
-                test[user].append(item)
+                test.setdefault(user, {})
+                test[user][item] = rating
             else:
-                train.setdefault(user, [])
-                train[user].append(item)
+                train.setdefault(user, {})
+                train[user][item] = rating
 
     return train, test
 

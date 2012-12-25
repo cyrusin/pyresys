@@ -32,7 +32,8 @@ def mae(results):
 def get_pecision_recall(n_result, test):
     '''get_precision_recall(dict, dict) -> (float, float)
 
-    Get the precision and recall from input of recommend results compared to the test dataset. The dict contains 'uid : [itemid,...]'.
+    Get the precision and recall from input of recommend results compared to the test dataset. 
+    The dict contains 'uid : [itemid,...]'.
     '''
     hit = 0
     n_precision = 0
@@ -48,7 +49,8 @@ def get_pecision_recall(n_result, test):
 def get_coverage(result, items):
     '''get_coverage(dict, list) -> string
     
-    This will compute the coverage of the result, and the coverage really tells the ability of discovering the long tail item.
+    This will compute the coverage of the result.
+    The coverage really tells the ability of discovering the long tail item.
     '''
     result_iid = set() 
     for iid in result.itervalues():

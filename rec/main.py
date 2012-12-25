@@ -8,14 +8,15 @@ import data_processing
     
 # Path of the dataset
 # path = raw_input('The path of original dataset:')
-path = '/home/gxb-hy/dataset/MovieLens/ml-100k/u.data'
+#path = '/home/gxb-hy/dataset/MovieLens/ml-100k/u.data'
+path = '/home/lishuai/dataset/MovieLens/ml-100k/u.data'
 
-M = int(raw_input('Looping M:'))
+M = int(raw_input('Looping M:')) # loopting times, M-fold cross validation
 
 train, test = data_processing.get_train_test(path, M, 0, 1)
 
 with open('test.data', 'a') as f:
-    for k in test:
+    for k, v in test:
         f.write(k)
         f.write('\t')
         count = 0
