@@ -3,7 +3,7 @@
 '''
 
 import math
-
+from operator import itemgetter
 
 def user_sim_matrix(train):
     '''user_sim_matrix(dict) -> dict
@@ -35,23 +35,51 @@ def user_similarity(train):
         for item in prefs.keys():
             if item not in item_users:
                 item_users[item] = set()
-         item_user[item].add(user)
+            item_users[item].add(user)
     # compute the co-rated items between the users
     C = dict() 
     N = dict() 
-    for item, users in item_user.items():
+    for item, users in item_users.items():
         for u in users:
+            N.setdefault(u, 0)
             N[u] += 1
             for v in users:
                 if u == v:
                     continue
                 else:
+                    C.setdefault(u, {})
+                    C[u].setdefault(v, 0)
                     C[u][v] += 1
 
     # get the sim_matrix
     for user, co_users in C.items():
         for v, cuv in co_users.items():
-            sim_matrix[user][v] = cuv / math.sqrt(N(user) * N(v))
+            sim_matrix.setdefault(user, {})
+            sim_matrix[user].setdefault(v, 0.0)
+            sim_matrix[user][v] = cuv / math.sqrt(N[user] * N[v] * 1.0)
 
     return sim_matrix
+
+# recommend to user
+def recommend(user, train, sim_matrix, K=5):
+    '''recommend(int, dict, dict, int) -> dict
+
+    This will return the recommendation to the user based the user's k neighbors.
+    '''
+    rank = dict()
+    user_prefs = train[user]
+
+    neighbors = sorted(sim_matrix[user].items(), key = itemgetter(1), reverse = True)[0:K]
+    for v, sim_uv in neighbors:
+        #print type(sim_uv)
+        for item, score in train[v].items():
+            #print type(score)
+            if item in user_prefs:
+                continue
+            else:
+                rank.setdefault(item, 0.0)
+                rank[item] += sim_uv * score
+
+    return rank
+
 

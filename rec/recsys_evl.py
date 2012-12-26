@@ -82,42 +82,42 @@ def get_popularity(result, items):
     return popularity
 
 # Get the recall of the experiment(Top-N)
-def get_recall(train, test, N, func):
-    '''get_recall(dict, dict, int, func) -> float
+def get_recall(train, test, func, sim_matrix):
+    '''get_recall(dict, dict, func, dict) -> float
 
     Return the recall of the recommendation compared to the test data.
-    Declare the N in the Top-N recommendation.
+    sim_matrix: the similarity matrix comes from the train set.
     '''
     hit = 0
     num = 0
     for u in train.keys():
         tu = test[u]
-        result = func(u, N, train)
-        for item, pui in result:
+        result = func(u, train, sim_matrix)
+        for item, pui in result.items():
             if item in tu:
                 hit += 1
 
         num += len(tu)
 
-    return 'Recall: %f' % hit / float(num)
+    return 'Recall: %f' % (hit / float(num))
 
 # Get the precision of the experiment(Top-N)
-def get_precision(train, test, N, func):
-    '''get_precision(dict, dict, int, func) -> float
+def get_precision(train, test, func, sim_matrix):
+    '''get_precision(dict, dict, func, dict) -> float
 
     Return the precision of the recommendation compared to the test data.
-    Declare the N in the Top-N recommendation.
+    sim_matrix: the similarity matrix comes from the train set.
     '''
     hit = 0
     num = 0
     for u in test.keys():
-        tu = train[user]
-        result = func(u, N, train)
-        for item, pui in result:
+        tu = train[u]
+        result = func(u, train, sim_matrix)
+        for item, pui in result.items():
             if item in test[u]:
                 hit += 1
 
         num += len(tu)
 
-    return 'Precision: %f' % hit / float(num)
+    return 'Precision: %f' % (hit / float(num))
 
