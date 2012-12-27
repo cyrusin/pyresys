@@ -101,7 +101,7 @@ def user_similarity_iif(train):
     return sim_matrix
             
 # recommend to user
-def recommend(user, train, sim_matrix, K=5):
+def recommend(user, train, sim_matrix, K=30):
     '''recommend(int, dict, dict, int) -> dict
 
     This will return the recommendation to the user based the user's k neighbors.

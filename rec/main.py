@@ -6,6 +6,7 @@
 
 import data_processing
 import user_cf
+import item_cf
 import recsys_evl
     
 # Path of the dataset
@@ -41,3 +42,4 @@ recall = recsys_evl.get_recall(train, test, user_cf.recommend, sim_matrix)
 precision = recsys_evl.get_precision(train, test, user_cf.recommend, sim_matrix)
 
 print recall, precision
+
