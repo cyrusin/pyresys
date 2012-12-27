@@ -35,6 +35,10 @@ def item_similarity(train):
 
 # get the item similarity with the popularity of the user concernd
 def item_similarity_iif(train):
+    '''item_similarity_iif(dict) -> dict
+
+    This will improve the coverage percentage of the item-based collaborative filtering by the penalty factor of popular user.
+    '''
     sim_matrix = dict()
     C = dict()
     N = dict()
