@@ -89,10 +89,10 @@ def user_similarity_iif(train):
                     continue
                 else:
                     C.setdefault(u, {})
-                    C.setdefault(v, 0)
-                    C[u][v] += math.log(1+len(users))
+                    C[u].setdefault(v, 0.0)
+                    C[u][v] += 1 / math.log(1+len(users))
 
-    for user, co_users in C.items()
+    for user, co_users in C.items():
         for v, cuv in co_users.items():
             sim_matrix.setdefault(user, {})
             sim_matrix.setdefault(v, 0.0)
