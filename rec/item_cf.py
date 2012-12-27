@@ -4,6 +4,7 @@
 import math
 from operator import itemgetter
 
+# get the item similarity 
 def item_similarity(train):
     '''item_similarity(dict) -> dict
 
@@ -14,9 +15,10 @@ def item_similarity(train):
     N = dict()
 
     for u, prefs in train.items():
-        for item in prefs.keys():
+        for item in prefs:
+            N.setdefault(item, 0)
             N[item] += 1
-            for other in prefs.keys():
+            for other in prefs:
                 if item == other:
                     continue
                 else:
@@ -31,6 +33,32 @@ def item_similarity(train):
 
     return sim_matrix
 
+# get the item similarity with the popularity of the user concernd
+def item_similarity_iif(train):
+    sim_matrix = dict()
+    C = dict()
+    N = dict()
+
+    for u, prefs in train.items():
+        for item in prefs:
+            N.setdefault(item, 0)
+            N[item] += 1
+            for other in prefs:
+                if item == other:
+                    continue
+                else:
+                    C.setdefault(item, {})
+                    C[item].setdefault(other, 0.0)
+                    C[item][other] += math.log(1+len(prefs)*1.0)
+    item_other = C.items()
+    for item, co_items in item_other:
+        sim_matrix.setdefault(item, {})
+        others = co_items.items()
+        for i, cui in others:
+            sim_matrix[item][i] = cui / math.sqrt(N[item] * N[i] * 1.0)
+    return sim_matrix
+
+
 def recommend(user, train, sim_matrix, K=10):
     '''recommend(ini, dict, dict, int) -> dict
 
@@ -40,7 +68,7 @@ def recommend(user, train, sim_matrix, K=10):
     rank = dict()
 
     for item, pi in prefs.items():
-        neighbors = sorted(sim_matrix[item].items(), key=itemgetter(1), reverse=True)[0:k]
+        neighbors = sorted(sim_matrix[item].items(), key=itemgetter(1), reverse=True)[0:K]
         for co_item, sim in neighbors:
             if co_item in prefs:
                 continue

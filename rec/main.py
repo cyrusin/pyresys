@@ -5,7 +5,7 @@
 '''
 
 import data_processing
-import user_cf
+#import user_cf
 import item_cf
 import recsys_evl
     
@@ -34,12 +34,15 @@ train, test = data_processing.get_train_test(path, M, 0, 1)
 #                 f.write('\t')
 
 # get the user similarity matrix
-sim_matrix = user_cf.user_similarity_iif(train)
+#sim_matrix = user_cf.user_similarity_iif(train)
+
+# get the item similarity matrix
+sim_matrix = item_cf.item_similarity_iif(train)
 
 # get the recall 
-recall = recsys_evl.get_recall(train, test, user_cf.recommend, sim_matrix)
+recall = recsys_evl.get_recall(train, test, item_cf.recommend, sim_matrix)
 #get the precision
-precision = recsys_evl.get_precision(train, test, user_cf.recommend, sim_matrix)
+precision = recsys_evl.get_precision(train, test, item_cf.recommend, sim_matrix)
 
 print recall, precision
 
