@@ -10,8 +10,8 @@ import recsys_evl
     
 # Path of the dataset
 # path = raw_input('The path of original dataset:')
-path = '/home/gxb-hy/dataset/MovieLens/ml-100k/u.data'
-#path = '/home/lishuai/dataset/MovieLens/ml-100k/u.data'
+#path = '/home/gxb-hy/dataset/MovieLens/ml-100k/u.data'
+path = '/home/lishuai/dataset/MovieLens/ml-100k/u.data'
 
 # loopting times, M-fold cross validation
 M = int(raw_input('Looping M:')) 
@@ -33,7 +33,7 @@ train, test = data_processing.get_train_test(path, M, 0, 1)
 #                 f.write('\t')
 
 # get the user similarity matrix
-sim_matrix = user_cf.user_similarity(train)
+sim_matrix = user_cf.user_similarity_iif(train)
 
 # get the recall 
 recall = recsys_evl.get_recall(train, test, user_cf.recommend, sim_matrix)

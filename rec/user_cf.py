@@ -25,7 +25,7 @@ def user_similarity(train):
     '''user_similarity(dict) -> dict
 
     This will return the user similarity matrix. 
-    It uses the item-users inverse table to make the computing process easy.
+    It uses the item-users inverse table to make the computing process fast.
     '''
     sim_matrix = dict()
     item_users = dict()
@@ -60,6 +60,46 @@ def user_similarity(train):
 
     return sim_matrix
 
+# another implementation of the user similarity based on the popularity of the item
+def user_similarity_iif(train):
+    '''user_similarity_iif(dict) -> dict
+
+    This function will return the user similarity matrix based on the popularity of the item
+    which is preferd by one user and another.
+    It first uses the inverse table of the item-users to make the computing process fast.
+    '''
+    sim_matrix = dict()
+    item_users = dict()
+    # build the item-users inverse table
+    for user, prefs in train.items():
+        for item in prefs.keys():
+            if item not in item_users:
+                item_users[item] = set()
+            item_users[item].add(user)
+    
+    C = dict() # this matrix contains the intersection of every two users
+    N = dict() # this matrix contains the num of items each user' preference
+
+    for item, users in item_users.items():
+        for u in users:
+            N.setdefault(u, 0)
+            N[u] += 1
+            for v in users:
+                if u == v:
+                    continue
+                else:
+                    C.setdefault(u, {})
+                    C.setdefault(v, 0)
+                    C[u][v] += math.log(1+len(users))
+
+    for user, co_users in C.items()
+        for v, cuv in co_users.items():
+            sim_matrix.setdefault(user, {})
+            sim_matrix.setdefault(v, 0.0)
+            sim_matrix[user][v] = cuv / math.sqrt((N[user] * N[v]*1.0))
+
+    return sim_matrix
+            
 # recommend to user
 def recommend(user, train, sim_matrix, K=5):
     '''recommend(int, dict, dict, int) -> dict
