@@ -95,7 +95,7 @@ def user_similarity_iif(train):
     for user, co_users in C.items():
         for v, cuv in co_users.items():
             sim_matrix.setdefault(user, {})
-            sim_matrix.setdefault(v, 0.0)
+            sim_matrix[user].setdefault(v, 0.0)
             sim_matrix[user][v] = cuv / math.sqrt((N[user] * N[v]*1.0))
 
     return sim_matrix
