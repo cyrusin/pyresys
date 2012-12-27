@@ -45,7 +45,7 @@ def get_pecision_recall(n_result, test):
 
     return 'precision: %f, recall: %f' % (hit / float(n_precision), hit / float(n_recall))
     
-# Evaluate the coverage of the recommend system
+# Evaluate the coverage percentage of the recommend system
 def get_coverage(result, items):
     '''get_coverage(dict, list) -> string
     
@@ -81,7 +81,7 @@ def get_popularity(result, items):
 
     return popularity
 
-# Get the recall of the experiment(Top-N)
+# Get the recall of the recommendation
 def get_recall(train, test, func, sim_matrix):
     '''get_recall(dict, dict, func, dict) -> float
 
@@ -105,7 +105,7 @@ def get_recall(train, test, func, sim_matrix):
 
     return 'Recall: %f' % (hit / float(num))
 
-# Get the precision of the experiment(Top-N)
+# Get the precision of the recommedation 
 def get_precision(train, test, func, sim_matrix):
     '''get_precision(dict, dict, func, dict) -> float
 
