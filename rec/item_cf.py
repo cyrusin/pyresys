@@ -59,7 +59,12 @@ def item_similarity_iif(train):
         sim_matrix.setdefault(item, {})
         others = co_items.iteritems()
         for i, cui in others.iteritems():
-            sim_matrix[item][i] = cui / math.sqrt(N[item] * N[i] * 1.0)
+            if i not in sim_matrix.iterkeys():
+                sim_matrix.setdefault(i, {})
+            if item not in sim_matrix[i].iterkeys():
+
+                sim_matrix[i][item] = sim_matrix[item][i] = cui / math.sqrt(N[item] * N[i] * 1.0)
+
     return sim_matrix
 
 

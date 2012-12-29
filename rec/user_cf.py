@@ -40,7 +40,7 @@ def user_similarity(train):
     C = dict() 
     N = dict() 
     for item, users in item_users.iteritems():
-        for u in users.iterkeys():
+        for u in users:
             N.setdefault(u, 0)
             N[u] += 1
             for v in users:
@@ -53,10 +53,12 @@ def user_similarity(train):
 
     # get the sim_matrix
     for user, co_users in C.iteritems():
+        sim_matrix.setdefault(user, {})
         for v, cuv in co_users.iteritems():
-            sim_matrix.setdefault(user, {})
-            sim_matrix[user].setdefault(v, 0.0)
-            sim_matrix[user][v] = cuv / math.sqrt(N[user] * N[v] * 1.0)
+            sim_matrix.setdefault(v, {})
+            #sim_matrix[user].setdefault(v, 0.0)
+            if user not in sim_matrix[v]:
+                sim_matrix[v][user] = sim_matrix[user][v] = cuv / math.sqrt(N[user] * N[v] * 1.0)
 
     return sim_matrix
 
@@ -81,22 +83,25 @@ def user_similarity_iif(train):
     N = dict() # this matrix contains the num of items each user' preference
 
     for item, users in item_users.iteritems():
-        for u in users.iterkeys():
+        # The popularity of the item
+        pop = 1 / math.log(1+len(users))
+        for u in users:
+            C.setdefault(u, {})
             N.setdefault(u, 0)
             N[u] += 1
             for v in users:
                 if u == v:
                     continue
                 else:
-                    C.setdefault(u, {})
                     C[u].setdefault(v, 0.0)
-                    C[u][v] += 1 / math.log(1+len(users))
+                    C[u][v] += pop
 
     for user, co_users in C.iteritems():
+        sim_matrix.setdefault(user, {})
         for v, cuv in co_users.iteritems():
-            sim_matrix.setdefault(user, {})
-            sim_matrix[user].setdefault(v, 0.0)
-            sim_matrix[user][v] = cuv / math.sqrt((N[user] * N[v]*1.0))
+            sim_matrix.setdefault(v, {})
+            if user not in sim_matrix[v]:
+                sim_matrix[v][user] = sim_matrix[user][v] = cuv / math.sqrt((N[user] * N[v]*1.0))
 
     return sim_matrix
             
@@ -109,11 +114,9 @@ def recommend(user, train, sim_matrix, K=30):
     rank = dict()
     user_prefs = train[user]
 
-    neighbors = sorted(sim_matrix[user].items(), key = itemgetter(1), reverse = True)[0:K]
-    for v, sim_uv in neighbors.iteritems():
-        #print type(sim_uv)
+    neighbors = sorted(sim_matrix[user].iteritems(), key = itemgetter(1), reverse = True)[0:K]
+    for v, sim_uv in neighbors:
         for item, score in train[v].iteritems():
-            #print type(score)
             if item in user_prefs:
                 continue
             else:
