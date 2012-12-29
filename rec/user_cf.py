@@ -11,8 +11,8 @@ def user_sim_matrix(train):
     This will return the user similarity matrix. Use it when the train set is not very large.
     '''
     sim_matrix = dict()
-    for p1 in train.keys():
-        for p2 in train.keys():
+    for p1 in train.iterkeys():
+        for p2 in train.iterkeys():
             if p1 == p2:
                 continue
             else:
@@ -31,16 +31,16 @@ def user_similarity(train):
     item_users = dict()
     
     # build the item-users inverse table
-    for user, prefs in train.items():
-        for item in prefs.keys():
+    for user, prefs in train.iteritems():
+        for item in prefs.iterkeys():
             if item not in item_users:
                 item_users[item] = set()
             item_users[item].add(user)
     # compute the co-rated items between the users
     C = dict() 
     N = dict() 
-    for item, users in item_users.items():
-        for u in users:
+    for item, users in item_users.iteritems():
+        for u in users.iterkeys():
             N.setdefault(u, 0)
             N[u] += 1
             for v in users:
@@ -52,8 +52,8 @@ def user_similarity(train):
                     C[u][v] += 1
 
     # get the sim_matrix
-    for user, co_users in C.items():
-        for v, cuv in co_users.items():
+    for user, co_users in C.iteritems():
+        for v, cuv in co_users.iteritems():
             sim_matrix.setdefault(user, {})
             sim_matrix[user].setdefault(v, 0.0)
             sim_matrix[user][v] = cuv / math.sqrt(N[user] * N[v] * 1.0)
@@ -71,8 +71,8 @@ def user_similarity_iif(train):
     sim_matrix = dict()
     item_users = dict()
     # build the item-users inverse table
-    for user, prefs in train.items():
-        for item in prefs.keys():
+    for user, prefs in train.iteritems():
+        for item in prefs.iterkeys():
             if item not in item_users:
                 item_users[item] = set()
             item_users[item].add(user)
@@ -80,8 +80,8 @@ def user_similarity_iif(train):
     C = dict() # this matrix contains the intersection of every two users
     N = dict() # this matrix contains the num of items each user' preference
 
-    for item, users in item_users.items():
-        for u in users:
+    for item, users in item_users.iteritems():
+        for u in users.iterkeys():
             N.setdefault(u, 0)
             N[u] += 1
             for v in users:
@@ -92,8 +92,8 @@ def user_similarity_iif(train):
                     C[u].setdefault(v, 0.0)
                     C[u][v] += 1 / math.log(1+len(users))
 
-    for user, co_users in C.items():
-        for v, cuv in co_users.items():
+    for user, co_users in C.iteritems():
+        for v, cuv in co_users.iteritems():
             sim_matrix.setdefault(user, {})
             sim_matrix[user].setdefault(v, 0.0)
             sim_matrix[user][v] = cuv / math.sqrt((N[user] * N[v]*1.0))
@@ -110,9 +110,9 @@ def recommend(user, train, sim_matrix, K=30):
     user_prefs = train[user]
 
     neighbors = sorted(sim_matrix[user].items(), key = itemgetter(1), reverse = True)[0:K]
-    for v, sim_uv in neighbors:
+    for v, sim_uv in neighbors.iteritems():
         #print type(sim_uv)
-        for item, score in train[v].items():
+        for item, score in train[v].iteritems():
             #print type(score)
             if item in user_prefs:
                 continue
