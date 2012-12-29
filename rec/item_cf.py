@@ -55,10 +55,10 @@ def item_similarity_iif(train):
                     C[item].setdefault(other, 0.0)
                     C[item][other] += math.log(1+len(prefs)*1.0)
     item_other = C.items()
-    for item, co_items in item_other.iteritems():
+    for item, co_items in item_other:
         sim_matrix.setdefault(item, {})
         others = co_items.iteritems()
-        for i, cui in others.iteritems():
+        for i, cui in others:
             if i not in sim_matrix.iterkeys():
                 sim_matrix.setdefault(i, {})
             if item not in sim_matrix[i].iterkeys():
@@ -78,7 +78,7 @@ def recommend(user, train, sim_matrix, K=10):
 
     for item, pi in prefs.iteritems():
         neighbors = sorted(sim_matrix[item].items(), key=itemgetter(1), reverse=True)[0:K]
-        for co_item, sim in neighbors.iteritems():
+        for co_item, sim in neighbors:
             if co_item in prefs:
                 continue
             else:
