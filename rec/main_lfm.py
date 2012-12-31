@@ -29,11 +29,3 @@ for user in train.iterkeys():
     sample = latent_factor_model.random_get_sample(user, item_pool)
     all_sample[user] = sample
 
-
-
-
-
-
-
-
-

@@ -30,7 +30,7 @@ def random_get_sample(ori_user_prefs, item_pool):
 
     # Get the positive sample
     for item in ori_user_prefs:
-        sample[i] = 1              
+        sample[item] = 1              
 
     # n = 0
     ori_length = len(ori_user_prefs)
