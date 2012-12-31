@@ -91,13 +91,13 @@ def get_recall(train, test, func, sim_matrix):
     hit = 0
     num = 0
 
-    for u in train.keys():
+    for u in train.iterkeys():
         if u in test.keys():
             tu = test[u]
         else:
             continue
         result = func(u, train, sim_matrix)
-        for item, pui in result.items():
+        for item, pui in result.iteritems():
             if item in tu:
                 hit += 1
 
@@ -115,13 +115,13 @@ def get_precision(train, test, func, sim_matrix):
     hit = 0
     num = 0
 
-    for u in test.keys():
+    for u in test.iterkeys():
         if u in train.keys():
             tu = train[u]
         else:
             continue
         result = func(u, train, sim_matrix)
-        for item, pui in result.items():
+        for item, pui in result.iteritems():
             if item in test[u]:
                 hit += 1
 

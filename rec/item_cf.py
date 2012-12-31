@@ -18,18 +18,21 @@ def item_similarity(train):
         for item in prefs.iterkeys():
             N.setdefault(item, 0)
             N[item] += 1
+            C.setdefault(item, {})
+
             for other in prefs:
                 if item == other:
                     continue
                 else:
-                    C.setdefault(item, {})
                     C[item].setdefault(other, 0)
                     C[item][other] += 1
     
     for item, co_items in C.iteritems():
         sim_matrix.setdefault(item, {})
         for i, cui in co_items.iteritems():
-            sim_matrix[item][i] = cui / math.sqrt(N[item] * N[i] * 1.0)
+            sim_matrix.setdefault(i, {})
+            if user not in sim_matrix[i]:
+                sim[i][item] = sim_matrix[item][i] = cui / math.sqrt(N[item] * N[i] * 1.0)
 
     return sim_matrix
 
@@ -39,30 +42,28 @@ def item_similarity_iif(train):
 
     This will improve the coverage percentage of the item-based collaborative filtering by the penalty factor of popular user.
     '''
-    sim_matrix = dict()
+    sim_matrix = dict()  # Final similarity matrix
     C = dict()
     N = dict()
 
     for u, prefs in train.iteritems():
+        pop = math.log(1+len(prefs)*1.0)
         for item in prefs.iterkeys():
             N.setdefault(item, 0)
             N[item] += 1
+            C.setdefault(item, {})
             for other in prefs.iterkeys():
                 if item == other:
                     continue
                 else:
-                    C.setdefault(item, {})
                     C[item].setdefault(other, 0.0)
-                    C[item][other] += math.log(1+len(prefs)*1.0)
-    item_other = C.items()
-    for item, co_items in item_other:
-        sim_matrix.setdefault(item, {})
-        others = co_items.iteritems()
-        for i, cui in others:
-            if i not in sim_matrix.iterkeys():
-                sim_matrix.setdefault(i, {})
-            if item not in sim_matrix[i].iterkeys():
+                    C[item][other] += pop
 
+    for item, co_items in C.iteritems():
+        sim_matrix.setdefault(item, {})
+        for i, cui in co_items.iteritems():
+            sim_matrix.setdefault(i, {})
+            if item not in sim_matrix[i].iterkeys():
                 sim_matrix[i][item] = sim_matrix[item][i] = cui / math.sqrt(N[item] * N[i] * 1.0)
 
     return sim_matrix
