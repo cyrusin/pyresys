@@ -46,3 +46,61 @@ def random_get_sample(ori_user_prefs, item_pool):
 
     return sample
 
+def train_ifm_model(tr_set, K, N, learning_rate, penalty):
+    '''train_ifm_model(dict, int, int, float, float) -> dict, dict
+
+    This will return the two matrix: user-hiddenClass, hiddenClass-item.
+    '''
+
+    # The result matrix P, Q
+    P, Q = init_model(tr_set, K)
+
+    # Training process
+    for step in range(0, N):
+        for user in tr_set.iterkeys():
+            for item, rui in tr_set[user].iteritems():
+                eui = rui - predict(user, item)
+                for k in range(0, K):
+                    P[user][k] += learning_rate(eui * Q[item][k] - penalty * P[user][k])
+                    Q[item][k] += learning_rate(eui * P[user][k] - penalty * Q[user][k])
+        
+        learning_rate *= 0.9 # The learning rate should decrease in every iteration step 
+        
+    return P, Q
+
+def init_model(tr_set, K):
+    '''init_model(dict, int) -> dict, dict
+
+    This will return the initiation of the two matrix P, Q.
+    The parameter K is the number of the hidden classes. 
+    '''
+    
+    P, Q = dict(), dict()
+    
+    # Get the initiation of the P: user-hidden(k)
+    for user in tr_set.iterkeys():
+        P.setdefault(user, {})
+        for k in range(0, K):
+            P[user][k] = 0
+    # Get the initiation of the Q: hidden(k)-item
+    for items in tr_set.itervalues():
+        for item in items.iterkeys():
+            Q.setdefault(item, {})
+            for k in range(0, k):
+                Q[item][k] = 0
+
+    return P, Q
+
+def predict(user, item, P, Q, K):
+    '''predict(dict, int, dict, dict) -> float
+
+    This will predict the user's rating to the item.
+    The parameter K gives the number of the hidden classes.
+    '''
+    rating = 0.0
+    for k in range(0, K):
+        rating += P[user][k] * Q[item][k]
+
+    return rating
+
+
