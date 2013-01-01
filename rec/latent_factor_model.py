@@ -76,31 +76,30 @@ def init_model(tr_set, K):
     '''
     
     P, Q = dict(), dict()
-    
-    # Get the initiation of the P: user-hidden(k)
-    for user in tr_set.iterkeys():
-        P.setdefault(user, {})
-        for k in range(0, K):
-            P[user][k] = 0
-    # Get the initiation of the Q: hidden(k)-item
-    for items in tr_set.itervalues():
-        for item in items.iterkeys():
-            Q.setdefault(item, {})
-            for k in range(0, k):
-                Q[item][k] = 0
+    # Used to compute the initiation value of the element 
+    base = math.sqrt(K)
+
+    for u, i, rui in tr_set.iteritems():
+        # Get the initiation of the P: user-hidden(k)
+        if u not in P:
+            P[u] = [random.random() / base \
+                    for x in range(0, K)]
+
+        # Get the initiation of the Q: hidden(k)-item
+        if i not in Q:
+            Q[i] = [random.random() / base \
+                    for x in range(0, K)]
 
     return P, Q
 
-def predict(user, item, P, Q, K):
+def predict(user, item, P, Q):
     '''predict(dict, int, dict, dict) -> float
 
     This will predict the user's rating to the item.
-    The parameter K gives the number of the hidden classes.
     '''
     rating = 0.0
-    for k in range(0, K):
-        rating += P[user][k] * Q[item][k]
+    length = len(P[user])
+    rating = sum(P[user][k] * Q[item][k] for k in xrange(0, length))
 
     return rating
-
 
