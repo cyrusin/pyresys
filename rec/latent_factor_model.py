@@ -62,7 +62,7 @@ def train_ifm_model(tr_set, K, N, learning_rate, penalty):
                 eui = rui - predict(user, item, P, Q)
                 for k in range(0, K):
                     P[user][k] += learning_rate * (eui * Q[item][k] - penalty * P[user][k])
-                    Q[item][k] += learning_rate * (eui * P[user][k] - penalty * Q[user][k])
+                    Q[item][k] += learning_rate * (eui * P[user][k] - penalty * Q[item][k])
         
         learning_rate *= 0.9 # The learning rate should decrease in every iteration step 
         
