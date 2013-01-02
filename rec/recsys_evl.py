@@ -29,21 +29,27 @@ def mae(results):
             / float(len(results))
 
 # Evaluate the result using precision & recall in (Top-N & 0-1) recommendation 
-def get_pecision_recall(n_result, test):
-    '''get_precision_recall(dict, dict) -> (float, float)
+def get_pecision_recall(train, test, func, sim_matrix):
+    '''get_precision_recall(dict, dict, func) -> float, float
 
     Get the precision and recall from input of recommend results compared to the test dataset. 
-    The dict contains 'uid : [itemid,...]'.
     '''
     hit = 0
-    n_precision = 0
-    n_recall = 0
-    for user, items in test.items():
-        hit  += len(n_result[user] & items)
-        n_precision += len(n_result[user])
-        n_recall += len(test[user])
+    train_num = 0
+    test_num = 0
+    for u in test.iterkeys():
+        if u in train.iterkeys():
+            tr = train[u]
+            te = test[u]
+        else:
+            continue
+        hitTrain = set(train[u].itervalues())
+        hitTest = set(test[u].itervalues())
+        hit += len(hitTrain & hitTest)
+        train_num += len(tr)
+        test_num += len(te)
 
-    return 'precision: %f, recall: %f' % (hit / float(n_precision), hit / float(n_recall))
+    return  hit / float(train_num), hit / float(test_num)
     
 # Evaluate the coverage percentage of the recommend system
 def get_coverage(result, items):

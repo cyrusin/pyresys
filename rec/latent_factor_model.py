@@ -105,6 +105,28 @@ def predict(user, item, P, Q):
 
     return rating
 
+# Generate recommendation to one user
+def recommend(user, train, P, Q):
+    '''recommend(int, dict, dict, dict) -> dict
+
+    This will return the recommendation to the user.
+    '''
+    rank = dict()
+    hidden_num = len(P[user])
+    for item in Q.iterkeys():
+        if item in train.iterkeys():
+            continue
+        else:
+            for k in range(0, hidden_num):
+                score += P[user][k] * Q[item][k]
+
+            if score > 0.5:
+                rank[item] = score
+
+    return rank
+
+
+
 # Get the precision of the model's prediction
 def get_precision(train, test, P, Q):
    '''get_precision(dict, dict, dict) -> float
