@@ -32,7 +32,7 @@ for user in train.iterkeys():
 # Get the model from the training sample
 model_p = dict()
 model_q = dict()
-model_p, model_q = latent_factor_model.train_ifm_model(tr_set, 100, 10, 0.02, 0.01)
+model_p, model_q = latent_factor_model.train_ifm_model(all_sample, 100, 10, 0.02, 0.01)
 
 # Pickle the result for reuse
 fp = open('pmatrix', 'w')

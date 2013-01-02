@@ -79,16 +79,16 @@ def init_model(tr_set, K):
     # Used to compute the initiation value of the element 
     base = math.sqrt(K)
 
-    for u, i, rui in tr_set.iteritems():
+    for u, prefs in tr_set.iteritems():
         # Get the initiation of the P: user-hidden(k)
         if u not in P:
             P[u] = [random.random() / base \
                     for x in range(0, K)]
-
-        # Get the initiation of the Q: hidden(k)-item
-        if i not in Q:
-            Q[i] = [random.random() / base \
-                    for x in range(0, K)]
+        for i, rui in prefs.iteritems():
+            # Get the initiation of the Q: hidden(k)-item
+            if i not in Q:
+                Q[i] = [random.random() / base \
+                        for x in range(0, K)]
 
     return P, Q
 
@@ -99,7 +99,7 @@ def predict(user, item, P, Q):
     '''
     rating = 0.0
     length = len(P[user])
-    rating = sum(P[user][k] * Q[item][k] for k in xrange(0, length))
+    rating = sum(P[user][k] * Q[item][k] for k in range(0, length))
 
     return rating
 
