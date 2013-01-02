@@ -1,5 +1,7 @@
 '''This module contains the implementation of recommending algorithms based on 
 the latent factor model.And the sample function to get the negative sample randomly.
+Also some evaluation functions are included.
+
 '''
 
 import math
@@ -103,4 +105,45 @@ def predict(user, item, P, Q):
 
     return rating
 
+# Get the precision of the model's prediction
+def get_precision(train, test, P, Q):
+   '''get_precision(dict, dict, dict) -> float
+
+   This will return the precision of the prediction based on the latent factor model.
+   '''
+    hit = 0
+    num = 0
+
+    for u in test.iterkeys():
+        if u in train.iterkeys():
+            tu = train[u]
+        else:
+            continue
+        result = recommend(u, train, P, Q)
+        for item, pui in result.iteritems():
+            if item in test[u]:
+                hit += 1
+        num += len(tu)
+
+    return 'Precision: %f' % (hit/ float(num))
+
+def get_recall(train, test, P, Q):
+    '''get_recall(dict, dict, dict, dict) -> float
+
+    This will return the recall of the prediction based on the latent factor model.
+    '''
+    hit = 0
+    num = 0
+
+    for u in train.iterkeys():
+        if u in test.iterkeys():
+            tu = test[u]
+        else:
+            continue
+        result = recommend(u, train, P, Q)
+        for item, pui in result.iteritems():
+            if item in test[u]:
+                hit += 1
+        num += len(tu)
+   return 'Precision: %f' % (hit / float(num))
 
