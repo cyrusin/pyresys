@@ -39,7 +39,7 @@ def random_get_sample(ori_user_prefs, item_pool):
     length = len(item_pool)
     
     # Get the negative sample
-    for i in xrange(0, ori_length):
+    for i in xrange(0, 2*ori_length):
         item = item_pool[random.randint(0, length - 1 )]
         if item in sample:
             continue
