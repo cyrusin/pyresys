@@ -140,8 +140,8 @@ def get_precision(result, test):
             tu = result[u]
         else:
             continue
-        for item in result[u].iterkeys():
-            if item in test[u]:
+        for item in test[u].iterkeys():
+            if item in result[u]:
                 hit += 1
         num += len(tu)
 
@@ -164,5 +164,5 @@ def get_recall(result, test):
             if item in result[u]:
                 hit += 1
         num += len(tu)
-    return 'Precision: %f' % (hit / float(num))
+    return 'Recall: %f' % (hit / float(num))
 
