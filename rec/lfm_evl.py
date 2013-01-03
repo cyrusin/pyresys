@@ -8,16 +8,16 @@ import latent_factor_model
 import cPickle as pickle
 
 # Load test, result
-path = '/home/lishuai/work/lfm/test1/'
+path = '/home/lishuai/work/lfm/test2/'
 
-fte = open('testset', 'r')
+fte = open(path+'testset', 'r')
 test = pickle.load(fte)
 fte.close()
 
-fre = open('recommendation', 'r')
+fre = open(path+'recommendation', 'r')
 result = pickle.load(fre)
 fre.close()
 
 # Get the precision and recall
-latent_factor_model.get_precision(result, test)
-latent_factor_model.get_recall(result, test)
+print latent_factor_model.get_precision(result, test)
+print latent_factor_model.get_recall(result, test)

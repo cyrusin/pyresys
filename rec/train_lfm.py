@@ -35,8 +35,8 @@ model_q = dict()
 model_p, model_q = latent_factor_model.train_ifm_model(all_sample, 100, 10, 0.02, 0.01)
 
 # Pickle the result for reuse
-fp = open('/home/lishuai/work/lfm/test1/pmatrix', 'w')
-fq = open('/home/lishuai/work/lfm/test1/qmatrix', 'w')
+fp = open('/home/lishuai/work/lfm/test2/pmatrix', 'w')
+fq = open('/home/lishuai/work/lfm/test2/qmatrix', 'w')
 pickle.dump(model_p, fp)
 pickle.dump(model_q, fq)
 
@@ -44,8 +44,8 @@ fp.close()
 fq.close()
 
 # Pickle the data set 
-ftr = open('/home/lishuai/work/lfm/test1/trainset', 'w')
-fte = open('/home/lishuai/work/lfm/test1/testset', 'w')
+ftr = open('/home/lishuai/work/lfm/test2/trainset', 'w')
+fte = open('/home/lishuai/work/lfm/test2/testset', 'w')
 pickle.dump(train, ftr)
 pickle.dump(test, fte)
 

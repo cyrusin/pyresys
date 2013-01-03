@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # filename: main_lfm.py
 '''The main module of experiment using latent factor model.
+This is mainly used to get the recommendation for all users.
 
 '''
 
@@ -8,7 +9,7 @@ import latent_factor_model
 import cPickle as pickle
 
 # Load P, Q, trainingset, testset
-path = '/home/lishuai/work/lfm/test1/'
+path = '/home/lishuai/work/lfm/test2/'
 
 fp = open(path+'pmatrix', 'r')
 P = pickle.load(fp)
