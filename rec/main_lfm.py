@@ -32,8 +32,10 @@ for u in train.iterkeys():
     prefs = latent_factor_model.recommend(u, train, P, Q)
     result[u] = prefs
 
+# Pickle the result
+f = open(path+'recommendation', 'w')
+pickle.dump(result, f)
+f.close()
+
 print 'All is done!'
-
-
-
 
