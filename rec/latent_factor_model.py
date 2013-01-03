@@ -113,6 +113,7 @@ def recommend(user, train, P, Q):
     '''
     rank = dict()
     hidden_num = len(P[user])
+    score = 0.0
     for item in Q.iterkeys():
         if item in train.iterkeys():
             continue
@@ -129,10 +130,10 @@ def recommend(user, train, P, Q):
 
 # Get the precision of the model's prediction
 def get_precision(train, test, P, Q):
-   '''get_precision(dict, dict, dict) -> float
+    '''get_precision(dict, dict, dict) -> float
 
-   This will return the precision of the prediction based on the latent factor model.
-   '''
+    This will return the precision of the prediction based on the latent factor model.
+    '''
     hit = 0
     num = 0
 
@@ -147,7 +148,7 @@ def get_precision(train, test, P, Q):
                 hit += 1
         num += len(tu)
 
-    return 'Precision: %f' % (hit/ float(num))
+    return 'Precision: %f' % (hit / float(num))
 
 def get_recall(train, test, P, Q):
     '''get_recall(dict, dict, dict, dict) -> float
@@ -167,5 +168,5 @@ def get_recall(train, test, P, Q):
             if item in test[u]:
                 hit += 1
         num += len(tu)
-   return 'Precision: %f' % (hit / float(num))
+    return 'Precision: %f' % (hit / float(num))
 
