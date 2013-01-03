@@ -4,19 +4,36 @@
 
 '''
 
-import data_processing
 import latent_factor_model
 import cPickle as pickle
 
-# The path of the data source
-path = '/home/lishuai/dataset/MovieLens/ml-100k/u.data'
+# Load P, Q, trainingset, testset
+path = '/home/lishuai/work/lfm/test1/'
 
-# Looping times, M-fold validation
-M = int(raw_input('Looping M:'))
+fp = open(path+'pmatrix', 'r')
+P = pickle.load(fp)
+fp.close()
 
-# Get training set and test set from the data source, 
-# and the result train just have the positive sample
-train, test = data_processing.get_train_test(path, M, 0, 1)
+fq = open(path+'qmatrix', 'r')
+Q = pickle.load(fq)
+fq.close()
+
+ftr = open(path+'trainset')
+train = pickle.load(ftr)
+ftr.close()
+
+fte = open(path+'testset')
+test = pickle.load(fte)
+fte.close()
+
+# Get recommedation to all users
+result = dict()
+for u in train.iterkeys():
+    prefs = latent_factor_model.recommend(u, train, P, Q)
+    result[u] = prefs
+
+print 'All is done!'
+
 
 
 
