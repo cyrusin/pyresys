@@ -9,7 +9,7 @@ import latent_factor_model
 import cPickle as pickle
 
 # Load P, Q, trainingset, testset
-path = '/home/lishuai/work/lfm/test4/'
+path = '/home/lishuai/work/lfm/test5/'
 
 fp = open(path+'pmatrix', 'r')
 P = pickle.load(fp)

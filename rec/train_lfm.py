@@ -32,11 +32,11 @@ for user in train.iterkeys():
 # Get the model from the training sample
 model_p = dict()
 model_q = dict()
-model_p, model_q = latent_factor_model.train_ifm_model(all_sample, 100, 10, 0.02, 0.01)
+model_p, model_q = latent_factor_model.train_ifm_model(all_sample, 100, 20, 0.02, 0.01)
 
 # Pickle the result for reuse
-fp = open('/home/lishuai/work/lfm/test4/pmatrix', 'w')
-fq = open('/home/lishuai/work/lfm/test4/qmatrix', 'w')
+fp = open('/home/lishuai/work/lfm/test5/pmatrix', 'w')
+fq = open('/home/lishuai/work/lfm/test5/qmatrix', 'w')
 pickle.dump(model_p, fp)
 pickle.dump(model_q, fq)
 
@@ -44,8 +44,8 @@ fp.close()
 fq.close()
 
 # Pickle the data set 
-ftr = open('/home/lishuai/work/lfm/test4/trainset', 'w')
-fte = open('/home/lishuai/work/lfm/test4/testset', 'w')
+ftr = open('/home/lishuai/work/lfm/test5/trainset', 'w')
+fte = open('/home/lishuai/work/lfm/test5/testset', 'w')
 pickle.dump(train, ftr)
 pickle.dump(test, fte)
 
