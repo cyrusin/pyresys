@@ -8,7 +8,7 @@ import latent_factor_model
 import cPickle as pickle
 
 # Load test, result
-path = '/home/lishuai/work/lfm/test5/'
+path = '/home/lishuai/work/lfm/test6/'
 
 fte = open(path+'testset', 'r')
 test = pickle.load(fte)

@@ -121,7 +121,7 @@ def recommend(user, train, P, Q):
             for k in range(0, hidden_num):
                 score += P[user][k] * Q[item][k]
 
-            if score >  0.0:
+            if score >  0.5:
                 rank[item] = score
 
     return rank
