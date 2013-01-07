@@ -64,12 +64,49 @@ class nnet:
             cur = self.con.execute('insert into hidden_layer (hnode) \
                     values (%s)' % hnode)
             hid = cur.lastrowid
-            
+            # Set the default weight for the new connections
             for w in words:
                 self.set_weight(w, hid, 0, 1.0 / len(words))
             for u in urls:
                 self.set_weight(hid, u, 1, 0.1)
 
             self.con.commit()
+
+    # Get the all related hidden nodes with the querywords and result urls 
+    def get_hnode(self, wordids, urlids):
+        res = dict()
+        # Select from word_to_hidden
+        for wid in wordids:
+            cur = self.con.execute('select toid from word_to_hidden \
+                    where fromid = %d' % wid)
+            for row in cur:
+                res.setdefault(row[0], 1)
+        # Select from the hidden_to_url
+        for uid in urlids:
+            cur = self.con.execute('select fromid from hidden_to_url \
+                    where toid = %d' % uid)
+            for row in cur:
+                res.setdefault(row[0], 1)
+
+        return res.keys()
+
+    # Get the neural network info from the database
+    def get_nn_info(self, wordids, urlids):
+        self.wordids = wordids
+        self.urlids = urlids
+        self.hiddenids = self.get_hnode(wordids, urlids)
+        
+        # Output of each layer(input, hidden, out)
+        self.word_out = [1.0] * len(wordids)
+        self.hidden_out = [1.0] * len(self.hiddenids)
+        self.url_out = [1.0] * len(urlids)
+
+        # Matrix of weights from word layer to hidden layer
+        self.mat_wh = [[self.get_weight(w, h, 0) for h in self.hiddenids] \
+                for w in self.wordids]
+        # Matrix of weights from hidden layer to url layer
+        self.mat_hu = [[self.get_weight(h, u, 1) for u in self.urlids] \
+                for h in self.hiddenids]
+
 
 
