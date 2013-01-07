@@ -27,7 +27,7 @@ def random_get_sample(ori_user_prefs, item_pool):
     The algorithm uses the random selection from the item list and the item appearance times
     in this list is based on the popularity.
     '''
-    # The sample of items for one user, value (1 or 0) implys the interest of the user to this item
+    # The sample of items for one user, value (1 or 0) implies the interest of the user to this item
     sample = dict()
 
     # Get the positive sample
