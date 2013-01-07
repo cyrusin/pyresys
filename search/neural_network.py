@@ -107,6 +107,28 @@ class nnet:
         # Matrix of weights from hidden layer to url layer
         self.mat_hu = [[self.get_weight(h, u, 1) for u in self.urlids] \
                 for h in self.hiddenids]
+    
+    # Using feeding forward to get the output
+    def get_ff_out(self):
+        for i in range(len(self.wordids)):
+            self.word_out[i] = 1.0
+        # The 1st step to get the hidden out
+        for j in range(len(self.hiddenids)):
+            res = 0.0
+            for i in range(len(self.wordids)):
+                res += self.word_out[i] * self.mat_wh[i][j]
+            self.hidden_out[j] = tanh(res)
+        # The 2nd step to get the url layer out
+        for j in range(len(self.hiddenids)):
+            res = 0.0
+            for i in range(len(self.hiddenids)):
+                res += self.hidden_out[i] * self.mat_hu[i][j]
+            self.url_out[j] = tanh(res)
 
+        return self.url_out[:]
 
+    # Build the nn model
+    def build_nn_model(self, wordids, urlids):
+        self.get_nn_info(wordids, urlids)
+        return self.get_ff__out()
 
