@@ -1,1 +1,1 @@
-__all__ = ['searcher', 'getstopwords']
+__all__ = ['searcher', 'getstopwords', 'neural_network']
