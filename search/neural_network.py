@@ -47,7 +47,7 @@ class nnet:
         result = self.con.execute('select rowid from table = %s \
                 where fromid = %d and toid = %d' \
                 % (table, fromid, toid)).fetchone()
-        if result = None:
+        if result == None:
             self.con.execute('insert into %s (fromid, toid, weight) \
                     values (%d, %d, %d)' % (table, fromid, toid, weight))
         else:
@@ -164,5 +164,41 @@ class nnet:
             for j in range(len(self.hiddenids)):
                 delta = delta_hidden[j] * self.word_out[i]
                 self.mat_wh[i][j] += learning_rate * delta
+
+    # The main method to train the nn 
+    def main_train(self, wordids, urlids, selectedUrl):
+        # First generate all the hidden node
+        self.generate_hidden(wordids, urlids)
+
+        # Feeding forward
+        self.get_nn_info(wordids, urlids)
+        self.get_ff_out()
+
+        # Backpropagation to update the model
+        targets = [0.0] * len(urlids)
+        targets[targets.index(selectedUrl)] = 1.0
+        self.bp_train(targets)
+
+        # Update the database
+        self.updatedb()
+    
+    # Method to update the database
+    def updatedb(self):
+        # Update the words to hidden layer
+        for i in range(len(self.wordids)):
+            for j in range(len(self.hiddenids)):
+                self.set_weight(self.wordids[i], \
+                        self.hiddenids[j], \
+                        0, \
+                        self.mat_wh[i][j])
+        # Update the hidden to urls layer
+        for i in range(len(self.hiddenids)):
+            for j in range(len(self.urlids)):
+                self.set_weight(self.hiddenids[i], \
+                        self.urlids[j], \
+                        0, \
+                        self.mat_hu[i][j])
+
+        self.con.commit()
 
 
