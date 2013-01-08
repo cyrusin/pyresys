@@ -2,6 +2,10 @@
 from math import tanh
 from pysqlite3 import dbapi3 as sqlite
 
+# Slope
+def dtanh(y):
+    return 1 - y*y
+
 class nnet:
     def __init__(self, dbname):
         self.con = sqlite.connect(dbname)
@@ -131,4 +135,34 @@ class nnet:
     def build_nn_model(self, wordids, urlids):
         self.get_nn_info(wordids, urlids)
         return self.get_ff__out()
+
+    
+    # The backpropagation algorithm to train the network
+    def bp_train(self, targets, learning_rate = 0.5):
+        # Get the error of final output
+        delta_url = [0.0] * len(self.urlids)
+        for i in range(len(self.urlids)):
+            error = targets[i] - self.url_out[i]
+            delta_url[i] = dtanh(self.url_out[i]) * error
+
+        # Get the error of the hidden output
+        delta_hidden = [0.0] * len(self.hiddenids)
+        for i in range(len(self.hiddenids):
+            error = 0.0
+            for j in range(len(self.mat_hu[i])):
+                error += self.mat_hu[i][j] * delta_url[j]
+            delta_hidden[i] = dtanh(self.hidden_out[i]) * error
+
+        # Update the link weight of the hidden layer to the url out layer
+        for i in range(len(self.hiddenids)):
+            for j in range(len(self.urlids)):
+                delta = delta_url[j] * self.hidden_out[i]
+                self.mat_hu[i][j] += learning_rate * delta
+
+        # Update the link weight of the word layer to the hidden layer
+        for i in range(len(self.wordids)):
+            for j in range(len(self.hiddenids)):
+                delta = delta_hidden[j] * self.word_out[i]
+                self.mat_wh[i][j] += learning_rate * delta
+
 
