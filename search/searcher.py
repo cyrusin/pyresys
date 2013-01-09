@@ -102,7 +102,7 @@ class crawler:
 		toid=self.getentryid('urltable', 'url', urlTo)
 		self.con.execute('insert into linktable(fromid, toid) \
                         values(%d, %d)' % (fromid, toid))
-    
+    # Main method to crawl on the web
 	def crawl(self, pages, depth=2):
 		for i in range(depth):
 			print 'Crawling %d:' % i 
@@ -143,7 +143,7 @@ class crawler:
 		self.con.execute('create index urltoidx on linktable(toid)')
 		self.con.execute('create index urlfromidx on linktable(fromid)')
 		self.dbcommit()
-
+    # Update the pagerank value 
 	def getpagerank(self, iters=10):
 		self.con.execute('drop table if exists prtable')
 		self.con.execute('create table prtable(urlid primary key,prvalue)')
@@ -180,7 +180,7 @@ class querying:
 	def __del__(self):
 		self.conn.close()
 
-    # The main method used to do querying
+    # The main method used to do query
 	def doquery(self, querystring):
 
         # Separate the query to single word
@@ -192,7 +192,8 @@ class querying:
 		tables = ''
 		clauses = ''
 		wordcount = 0
-
+        
+        # Get the result for each word of the query string
 		for word in wordlist:
 			wordrow = self.conn.execute("select rowid from wordtable \
                     where word='%s'" % word).fetchone()
@@ -214,23 +215,29 @@ class querying:
 		if len(wordidlist) == 0: 
 			print 'No Result!'
 			return  
+
 		if len(wordidlist) < len(wordlist):
 			print 'Lost some words:'
 			print lost
-		print 'select %s from %s where %s' %(fields, tables, clauses)
+
+		#print 'select %s from %s where %s' %(fields, tables, clauses)
 		queryrows = self.conn.execute('select %s from %s where %s' \
                 % (fields, tables, clauses))
 		result = [row for row in queryrows]
+
 		resultset = set([row[0] for row in result])
 		print 'Result:%d' %(len(resultset))
+
 		return result, wordidlist
-	
+
+	# Get the url name based on the urlid
 	def geturlname(self, urlid):
 		if urlid != None:
 			return self.conn.execute(
 				"select url from urltable \
                         where rowid=%d" % urlid).fetchone()[0]
-
+    
+    # Get the score of the search results for ranking
 	def geturlscoredict(self, queryrows, wordidlist):
 		urlscoredict = dict([(row[0], 0) for row in queryrows])
 		#weights=[(0.6,self.wordlocation(queryrows)),(0.4,self.worddist(queryrows))]
@@ -239,11 +246,12 @@ class querying:
 		weights = [(1.0, self.wordlocation(queryrows)), \
                     (1.0, self.wordfrequency(queryrows)), \
                     (1.0, self.usepagerank(queryrows))]
-		for (weight, scores) in weights:
+		for weight, scores in weights:
 			for url in urlscoredict:
 				urlscoredict[url] += weight*scores[url]
 		return urlscoredict	
-
+    
+    # Get the search result after ranking
 	def queryrank(self,querystring):
 		out = self.doquery(querystring)
 		if out == None: 
@@ -256,6 +264,7 @@ class querying:
 		for (score, urlid) in rankscores[0:20]:
 			print '%f\t%s' % (score, self.geturlname(urlid)) 
 
+    # Normalize the scores
 	def normalize(self, scores, smallflag=0):
 		v = 0.00001
 		if smallflag:
@@ -265,42 +274,57 @@ class querying:
 		else:
 			maxscore = max(scores.values())
 			if maxscore == 0: maxscore = v
-			return dict([(url, float(evl)/maxscore) for (url, evl) in scores.items()])
+			return dict([(url, float(evl)/maxscore) \
+                    for (url, evl) in scores.items()])
 
-	def wordfrequency(self, rows):
-		counts = dict([(row[0], 0) for row in rows])
-		for row in rows: counts[row[0]] += 1
+    # Get the word frequency in each url then normalize it
+	def wordfrequency(self, queryrows):
+		counts = dict([(row[0], 0) for row in queryrows])
+		for row in queryrows:
+            counts[row[0]] += 1
 		return self.normalize(counts)
 
+    # Get the word frequency ratio compared with the total amount of words 
 	def wordfrequencyratio(self, rows, wordidlist):
 		total = dict([(row[0], 0) for row in rows])
 		wordfreq = []
-		for urlid in total.keys():
-			total[urlid] = self.conn.execute("select count(*) from wordlocationinurl \
+
+		for urlid in total.iterkeys():
+			total[urlid] = self.conn.execute(\
+                    "select count(*) from wordlocationinurl \
                     where urlid=%d" % urlid).fetchone()[0]
 			for wordid in wordidlist:
-				wordfreq.append(self.conn.execute("select count(*) from wordlocationinurl \
-                        where wordid=%d and urlid=%d" % (wordid, urlid)).fetchone()[0])
+				wordfreq.append(self.conn.execute(\
+                        "select count(*) from wordlocationinurl \
+                        where wordid=%d and urlid=%d" \
+                        % (wordid, urlid)).fetchone()[0])
 			temp = min(wordfreq)
-			total[urlid] = float(temp)/total[urlid]
+			total[urlid] = float(temp) / total[urlid]
 		return self.normalize(total)
 						
-				
+	# Get the location of word in the web page			
 	def wordlocation(self, rows):
 		wordlocationdict = dict([(row[0], 100000) for row in rows])
 		for row in rows:
 			locationsum = sum(row[1:])
-			if locationsum < wordlocationdict[row[0]]: wordlocationdict[row[0]] = locationsum
+			if locationsum < wordlocationdict[row[0]]:
+                wordlocationdict[row[0]] = locationsum
 		return self.normalize(wordlocationdict, smallflag = 1)	
 
+    # Get the distance of the query words in the web page
+    # The small distance implies the high score of the url
 	def worddist(self, rows):
-		if len(rows[0]) <= 2: return dict([(row[0], 1.0) for row in rows])
+		if len(rows[0]) <= 2:
+            return dict([(row[0], 1.0) for row in rows])
 		distances = dict([(row[0], 100000) for row in rows])
+        # Find the smallest distance of the words
 		for row in rows:
 			tempdist = sum([abs(row[i]-row[i-1]) for i in range(2, len(row))])
-			if tempdist < distances[row[0]]: distances[row[0]] = tempdist
+			if tempdist < distances[row[0]]:
+                distances[row[0]] = tempdist
 		return self.normalize(distances, smallflag = 1)
 
+    # Get the url score based on the pagerank value
 	def usepagerank(self, rows):
 		if rows == None:
 			print 'Something wrong with usepagerank()!'
@@ -314,15 +338,18 @@ class querying:
 			prscore[url] = prscore[url] / maxvalue
 		return prscore
 
+    # Get the score of the urls based on the amount of inbound links 
 	def countinboundlink(self, rows):
 		allurls = set([row[0] for row in rows])
 		urlnumlist = []
 		for url in allurls:
 			urlnumlist.append((url, self.conn.execute(
-						"select count(*) from linktable where toid=%d" %url).fetchone()[0]))
+						"select count(*) from linktable where toid=%d" \
+                                % url).fetchone()[0]))
 		inboundnum = dict(urlnumlist)
 		return self.normalize(inboundnum)
 
+    # Get the total amount of the search results
 	def totalUrl(self):
 		numOfUrl = self.conn.execute('select count(*) from urltable').fetchone()[0]
 		print 'total webpages:', numOfUrl
