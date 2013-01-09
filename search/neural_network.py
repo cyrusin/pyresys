@@ -53,25 +53,25 @@ class nnet:
         else:
             rowid = result[0]
             self.con.execute('update %s set weight = %d where rowid = %d' \
-                    % (table, weight, rowid)
+                        % (table, weight, rowid)
 
     # Generate the hidden layer
-    def generate_hidden(self, words, urls):
-        if len(words) > 3:
-            return None
-        hnode = '_'.join(sorted([str(wi) for wi in words]) 
-        result = self.con.execute('select rowid from hidden_layer \
-                where hnode = %s' % (hnode)).fetchone()
+    def generate_hidden(self, wordids, urlids):
+        #if len(words) > 3:
+            #return None
+        hnode = '_'.join(sorted([str(wi) for wi in wordids]))
+        result = self.con.execute(
+            "select rowid from hidden_layer where hnode = %s" % hnode).fetchone()
 
         # If hasn't builded the connection
         if result == None:
-            cur = self.con.execute('insert into hidden_layer (hnode) \
-                    values (%s)' % hnode)
+            cur = self.con.execute(
+                "insert into hidden_layer (hnode) values (%s)" % hnode)
             hid = cur.lastrowid
             # Set the default weight for the new connections
-            for w in words:
+            for w in wordids:
                 self.set_weight(w, hid, 0, 1.0 / len(words))
-            for u in urls:
+            for u in urlids:
                 self.set_weight(hid, u, 1, 0.1)
 
             self.con.commit()
@@ -81,14 +81,14 @@ class nnet:
         res = dict()
         # Select from word_to_hidden
         for wid in wordids:
-            cur = self.con.execute('select toid from word_to_hidden \
-                    where fromid = %d' % wid)
+            cur = self.con.execute(
+                'select toid from word_to_hidden where fromid = %d' % wid)
             for row in cur:
                 res.setdefault(row[0], 1)
         # Select from the hidden_to_url
         for uid in urlids:
-            cur = self.con.execute('select fromid from hidden_to_url \
-                    where toid = %d' % uid)
+            cur = self.con.execute(
+                'select fromid from hidden_to_url where toid = %d' % uid)
             for row in cur:
                 res.setdefault(row[0], 1)
 
@@ -188,17 +188,15 @@ class nnet:
         for i in range(len(self.wordids)):
             for j in range(len(self.hiddenids)):
                 self.set_weight(self.wordids[i], \
-                        self.hiddenids[j], \
-                        0, \
-                        self.mat_wh[i][j])
+                                self.hiddenids[j], \
+                                0, \
+                                self.mat_wh[i][j])
         # Update the hidden to urls layer
         for i in range(len(self.hiddenids)):
             for j in range(len(self.urlids)):
                 self.set_weight(self.hiddenids[i], \
-                        self.urlids[j], \
-                        0, \
-                        self.mat_hu[i][j])
+                                self.urlids[j], \
+                                0, \
+                                self.mat_hu[i][j])
 
         self.con.commit()
-
-
