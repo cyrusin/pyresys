@@ -4,7 +4,6 @@
 # a significant amount of it into your product for commercial profit.
 #
 # Author: Li Shuai
-# URL: www.douban.com/people/mixlee
 #
 # Time: 2012-12-06
 
