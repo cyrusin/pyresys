@@ -1,35 +1,40 @@
-pyresys
-=======
+#pyresys
 
-This project includes frameworks of some intelligent applications:recommender system,information retrieval,data clustering,etc.
+This project includes frameworks of some intelligent applications:
+(1)recommender system,(2)lightweight search engine,(3)data clustering.
 
-#Targets
-	Webcrawler
-	Indexing
-	Searching
-	Recommender
-	Dataclustering
-#Details
-	RecommenderSystem
-		1)user-based
-		2)item-based
-		3)dataset:movielens
-		4)similaritymeasure:Euclidean distance,Pearson correlation
-	InformationRetrieval
-		1)use BeautifulSoup and urllib2 to parse the .html
-		2)compute the score of the webpage based on the content
-		3)use  SQLite as database  
-	DataClustering
-		1)hierarchical clustering
+What can it do?
+----------------
+----------------
+	web crawling
+	create index for the web page
+	search
+	build a recommender system
+	data clustering
+Details
+--------
+--------
+	-Top-N Recommender System:
+		1)Collaborative Filtering : User-based
+		2)Collaborative Filtering : Item-based
+		3)Latent Factor Model: SVD(singular value decomposition)
+		4)Evaluation of the performance: Recall, Precision, Coverage, Popularity 
+		5)Dataset for test : MovieLens
+		
+	-Lightweight search engine:
+		1)Use BeautifulSoup and urllib2 to parse the .html
+		2)Get the score of the web page for ranking based on the content,pagerank
+		3)Use  SQLite as database  
+	-Data clustering
+		1)Hierarchical clustering
 		2)K-means clustering
-#Uses
-	crawling:
-		>>>import searcher
-		>>>e=searcher.crawler('xxx.db')#the db you want to use for storing the data
-		>>>e.createindextables()
-		>>>pages=['http://...','http://...',...]#urllist
-		>>>e.crawl(pages)
-	searching:
-		>>>import searcher
-		>>>e=searcher.querying('xxx.db')
-		>>>e.queryrank('python programming')#fill in the query words
+About the lightweight search engine
+-----------------------------------
+-----------------------------------
+- All the main methods are in the module of 'search/searcher.py'.
+- The other module: 'search/crawl.py', 'search/update_pagerank.py', 'search/main.py' will run alone to do what you want: crawling, update the page rank value, and response to the query.
+-Crawl: 'python search/crawl.py'.
+-Update the pagerank value: 'python search/update_pagerank.py'.
+-Search: 'python search/main.py'
+
+
