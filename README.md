@@ -5,14 +5,12 @@ This project includes frameworks of some intelligent applications:
 
 What can it do?
 ----------------
-----------------
 	web crawling
 	create index for the web page
 	search
 	build a recommender system
 	data clustering
 Details
---------
 --------
 	-Top-N Recommender System:
 		1)Collaborative Filtering : User-based
@@ -29,7 +27,6 @@ Details
 		1)Hierarchical clustering
 		2)K-means clustering
 About the lightweight search engine
------------------------------------
 -----------------------------------
 - All the main methods are in the module of 'search/searcher.py'.
 - The other module: 'search/crawl.py', 'search/update_pagerank.py', 'search/main.py' will run alone to do what you want: crawling, update the page rank value, and response to the query.
