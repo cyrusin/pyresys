@@ -30,8 +30,8 @@ About the lightweight search engine
 -----------------------------------
 - All the main methods are in the module of 'search/searcher.py'.
 - The other module: 'search/crawl.py', 'search/update_pagerank.py', 'search/main.py' will run alone to do what you want: crawling, update the page rank value, and response to the query.
--Crawl: 'python search/crawl.py'.
--Update the pagerank value: 'python search/update_pagerank.py'.
--Search: 'python search/main.py'
+- Crawl: 'python search/crawl.py'.
+- Update the pagerank value: 'python search/update_pagerank.py'.
+- Search: 'python search/main.py'
 
 
