@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # filename: update_pagerank.py
+# Run this module using command "python update_pagerank.py"
 '''This module is running alone to update the pagerank value of each url.'''
 import searcher
     

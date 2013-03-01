@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # filename: getstopwords.py
+# Run this module using command "python getstopwords.py"
 '''This module is used to get the stop words and pickle it.'''
 import pickle
 try:

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # filename: main.py
+# Run this module using command "python main.py"
 '''This is module is the main method to run the query.'''
 import searcher
 query_obj = searcher.querying('index.db')
